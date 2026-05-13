@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }) => {
@@ -11,6 +12,7 @@ export const ThemeProvider = ({ children }) => {
         // Check system preference or localStorage
         const savedTheme = localStorage.getItem('astra-theme');
         if (savedTheme === 'dark') {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsDark(true);
             document.documentElement.classList.add('dark');
         } else {

@@ -117,8 +117,8 @@ const CartDrawer = () => {
                                         style={{
                                             width: '100%',
                                             padding: 'var(--spacing-md)',
-                                            backgroundColor: 'var(--color-primary)',
-                                            color: 'white',
+                                            backgroundColor: 'var(--color-accent)',
+                                            color: '#ffffff',
                                             borderRadius: 'var(--radius-md)',
                                             fontSize: '1rem',
                                             fontWeight: 600,

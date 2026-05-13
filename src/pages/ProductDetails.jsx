@@ -52,7 +52,7 @@ const ProductDetails = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         style={{
-                            height: '550px',
+                            height: '400px',
                             borderRadius: 'var(--radius-lg)',
                             overflow: 'hidden',
                             marginBottom: 'var(--spacing-md)',

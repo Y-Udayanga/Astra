@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     return useContext(AuthContext);
 };
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
         const storedUser = localStorage.getItem('astra_user');
         if (storedUser) {
             try {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setCurrentUser(JSON.parse(storedUser));
             } catch (e) {
                 console.error("Failed to parse stored user", e);
@@ -87,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {loading ? <div style={{ display: 'flex', height: '100vh', width: '100vw', justifyContent: 'center', alignItems: 'center' }}>Loading App...</div> : children}
         </AuthContext.Provider>
     );
 };

@@ -1,9 +1,3 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Mail, Lock } from 'lucide-react';
-
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
@@ -194,7 +188,7 @@ const Login = () => {
                             width: '100%',
                             padding: '14px',
                             backgroundColor: 'var(--color-primary)',
-                            color: '#ffffff',
+                            color: 'var(--color-primary-text)',
                             borderRadius: '12px',
                             fontWeight: 600,
                             cursor: isSubmitting ? 'not-allowed' : 'pointer',
@@ -275,4 +269,6 @@ const Login = () => {
         </motion.div>
     );
 };
+
+export default Login;
 

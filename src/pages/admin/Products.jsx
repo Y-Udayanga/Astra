@@ -12,7 +12,7 @@ const Products = () => {
                 </div>
                 <button style={{
                     backgroundColor: 'var(--color-primary)',
-                    color: 'white',
+                    color: 'var(--color-primary-text)',
                     border: 'none',
                     padding: '12px 24px',
                     borderRadius: '8px',

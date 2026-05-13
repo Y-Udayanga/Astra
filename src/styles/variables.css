@@ -11,6 +11,7 @@
   --color-border: #e5e7eb;
   --color-error: #ef4444;
   --color-success: #10b981;
+  --color-primary-text: #ffffff;
 
   /* Typography */
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -53,4 +54,5 @@
   --color-background: #09090b;
   --color-surface: #18181b;
   --color-border: #27272a;
+  --color-primary-text: #09090b;
 }

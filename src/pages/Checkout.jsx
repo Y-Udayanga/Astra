@@ -6,7 +6,6 @@ import { ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
 
 const Checkout = () => {
     const { cartItems, cartTotal } = useCart();
-    const navigate = useNavigate();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('card');
