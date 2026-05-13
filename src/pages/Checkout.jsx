@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
+import CryptoJS from 'crypto-js';
 
 const Checkout = () => {
     const { cartItems, cartTotal } = useCart();
@@ -10,15 +11,84 @@ const Checkout = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('card');
 
+    const location = useLocation();
+
+    // Check if coming back from a successful PayHere payment via redirect
+    React.useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        if (queryParams.get('status') === 'success') {
+            setIsSuccess(true);
+        }
+    }, [location]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (paymentMethod !== 'card') {
+            alert('Currently only PayHere Card payment is supported in this demo.');
+            return;
+        }
+
         setIsProcessing(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        const merchantId = import.meta.env.VITE_PAYHERE_MERCHANT_ID;
+        const merchantSecret = import.meta.env.VITE_PAYHERE_MERCHANT_SECRET;
+
+        if (!merchantId || !merchantSecret) {
+            alert('PayHere Merchant ID or Secret is not configured in .env file!');
+            setIsProcessing(false);
+            return;
+        }
+
+        const orderId = `ORD-${Date.now()}`;
+        const amount = parseFloat(cartTotal).toFixed(2);
+        const currency = 'LKR';
+
+        // Hash = md5(merchant_id + order_id + amount + currency + md5(merchant_secret).toUpperCase()).toUpperCase()
+        const hashedSecret = CryptoJS.MD5(merchantSecret).toString().toUpperCase();
+        const hash = CryptoJS.MD5(merchantId + orderId + amount + currency + hashedSecret).toString().toUpperCase();
+
+        const formData = new FormData(e.target);
+
+        const payment = {
+            sandbox: true,
+            merchant_id: merchantId,
+            return_url: window.location.origin + '/checkout?status=success',
+            cancel_url: window.location.origin + '/checkout?status=cancel',
+            notify_url: 'https://sandbox.payhere.lk/notify', // Mock notify URL
+            order_id: orderId,
+            items: 'Astra Store Purchase',
+            amount: amount,
+            currency: currency,
+            hash: hash,
+            first_name: formData.get('firstName'),
+            last_name: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: '0771234567', // Hardcoded for demo
+            address: formData.get('address'),
+            city: 'Colombo',
+            country: 'Sri Lanka',
+        };
+
+        // Event handlers for PayHere popup
+        window.payhere.onCompleted = function onCompleted(orderId) {
+            console.log("Payment completed. OrderID:" + orderId);
             setIsProcessing(false);
             setIsSuccess(true);
-            // In a real app, clear cart here
-        }, 2000);
+        };
+
+        window.payhere.onDismissed = function onDismissed() {
+            console.log("Payment dismissed");
+            setIsProcessing(false);
+        };
+
+        window.payhere.onError = function onError(error) {
+            console.log("Error:" + error);
+            alert("Payment Error: " + error);
+            setIsProcessing(false);
+        };
+
+        window.payhere.startPayment(payment);
     };
 
     if (isSuccess) {
@@ -57,11 +127,11 @@ const Checkout = () => {
                     <h3 style={{ marginBottom: 'var(--spacing-lg)' }}>Shipping Information</h3>
                     <form id="checkout-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
-                            <Input placeholder="First Name" required />
-                            <Input placeholder="Last Name" required />
+                            <Input name="firstName" placeholder="First Name" required />
+                            <Input name="lastName" placeholder="Last Name" required />
                         </div>
-                        <Input placeholder="Email Address" type="email" required />
-                        <Input placeholder="Street Address" required />
+                        <Input name="email" placeholder="Email Address" type="email" required />
+                        <Input name="address" placeholder="Street Address" required />
 
                         <h3 style={{ marginTop: 'var(--spacing-lg)', marginBottom: 'var(--spacing-sm)' }}>Payment Method</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: 'var(--spacing-md)' }}>
