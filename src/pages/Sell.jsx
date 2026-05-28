@@ -80,7 +80,7 @@ const Sell = () => {
                 </div>
 
                 {/* Product Details */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-lg)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(260px, 100%), 1fr))', gap: 'var(--spacing-lg)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
                         <label style={{ fontWeight: 500, fontSize: '0.9rem' }}>Product Name</label>
                         <div style={{ position: 'relative' }}>
@@ -143,7 +143,7 @@ const Sell = () => {
                     />
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-md)' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-md)', flexWrap: 'wrap' }}>
                     <button
                         type="button"
                         style={{
@@ -163,8 +163,8 @@ const Sell = () => {
                         style={{
                             padding: '12px 32px',
                             borderRadius: 'var(--radius-md)',
-                            backgroundColor: 'var(--color-text-main)',
-                            color: 'var(--color-background)',
+                            backgroundColor: 'var(--color-accent)',
+                            color: '#ffffff',
                             fontWeight: 600,
                             cursor: 'pointer',
                             border: 'none',
