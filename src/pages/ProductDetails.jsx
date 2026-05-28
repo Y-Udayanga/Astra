@@ -129,8 +129,8 @@ const ProductDetails = () => {
                             style={{
                                 flex: 1,
                                 padding: 'var(--spacing-lg)',
-                                backgroundColor: 'var(--color-text-main)',
-                                color: 'var(--color-background)',
+                                backgroundColor: 'var(--color-accent)',
+                                color: '#ffffff',
                                 fontSize: '1.1rem',
                                 fontWeight: 600,
                                 borderRadius: 'var(--radius-full)',
