@@ -53,8 +53,8 @@ const Checkout = () => {
         const payment = {
             sandbox: true,
             merchant_id: merchantId,
-            return_url: window.location.origin + '/checkout?status=success',
-            cancel_url: window.location.origin + '/checkout?status=cancel',
+            return_url: 'https://astra-web-app.vercel.app/checkout?status=success',
+            cancel_url: 'https://astra-web-app.vercel.app/checkout?status=cancel',
             notify_url: 'https://sandbox.payhere.lk/notify', // Mock notify URL
             order_id: orderId,
             items: 'Astra Store Purchase',
