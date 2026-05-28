@@ -44,7 +44,7 @@ const ProductDetails = () => {
                 <ArrowLeft size={18} /> Back to Shop
             </Link>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--spacing-3xl)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 'var(--spacing-2xl)' }}>
                 {/* Gallery */}
                 <div>
                     <motion.div
@@ -52,7 +52,7 @@ const ProductDetails = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         style={{
-                            height: '400px',
+                            height: 'clamp(280px, 50vw, 400px)',
                             borderRadius: 'var(--radius-lg)',
                             overflow: 'hidden',
                             marginBottom: 'var(--spacing-md)',
@@ -84,27 +84,27 @@ const ProductDetails = () => {
 
                 {/* Info */}
                 <div>
-                    <h1 style={{ fontSize: '3rem', marginBottom: 'var(--spacing-xs)', fontFamily: 'var(--font-family-display)' }}>{product.name}</h1>
+                    <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', marginBottom: 'var(--spacing-xs)', fontFamily: 'var(--font-family-display)' }}>{product.name}</h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)', marginBottom: 'var(--spacing-xl)', color: '#fbbf24' }}>
                         <Star fill="#fbbf24" size={20} />
                         <span style={{ color: 'var(--color-text-main)', fontWeight: 600 }}>{product.rating}</span>
                         <span style={{ color: 'var(--color-text-muted)' }}>(128 reviews)</span>
                     </div>
 
-                    <p style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-main)' }}>
+                    <p style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 700, marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-main)' }}>
                         ${product.price}
                     </p>
 
                     <div style={{ marginBottom: 'var(--spacing-xl)' }}>
                         <h4 style={{ marginBottom: 'var(--spacing-sm)', color: 'var(--color-text-muted)', textTransform: 'uppercase', fontSize: '0.9rem', letterSpacing: '1px' }}>Select Size</h4>
-                        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+                        <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
                             {['S', 'M', 'L', 'XL'].map(size => (
                                 <button
                                     key={size}
                                     onClick={() => setSelectedSize(size)}
                                     style={{
-                                        width: '60px',
-                                        height: '60px',
+                                        width: '50px',
+                                        height: '50px',
                                         borderRadius: 'var(--radius-md)',
                                         border: selectedSize === size ? '2px solid var(--color-accent)' : '1px solid var(--color-border)',
                                         backgroundColor: selectedSize === size ? 'var(--color-accent)' : 'transparent',
@@ -204,7 +204,7 @@ const ProductDetails = () => {
                     </div>
 
                     {/* Features */}
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xl)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--spacing-xl)' }}>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', paddingTop: 'var(--spacing-xl)', flexWrap: 'wrap' }}>
                         <div style={{ display: 'flex', gap: 'var(--spacing-sm)', alignItems: 'center', color: 'var(--color-text-muted)' }}>
                             <Truck size={20} />
                             <span style={{ fontSize: '0.9rem' }}>Free Shipping</span>
