@@ -11,12 +11,12 @@ const Contact = () => {
             transition={{ duration: 0.5 }}
             style={{ padding: 'var(--spacing-3xl) var(--spacing-xl)', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}
         >
-            <h1 style={{ fontSize: '3rem', fontFamily: 'var(--font-family-display)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>Contact Us</h1>
+            <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: 'var(--font-family-display)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>Contact Us</h1>
             <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-3xl)', fontSize: '1.2rem' }}>
                 We'd love to hear from you. Get in touch!
             </p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-3xl)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 'var(--spacing-2xl)' }}>
                 <div>
                     <h2 style={{ fontSize: '1.5rem', marginBottom: 'var(--spacing-lg)' }}>Get in Touch</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
@@ -52,9 +52,9 @@ const Contact = () => {
                 
                 <div>
                     <form style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }} onSubmit={(e) => e.preventDefault()}>
-                        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-                            <input type="text" placeholder="First Name" style={{ flex: 1, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-main)' }} />
-                            <input type="text" placeholder="Last Name" style={{ flex: 1, padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-main)' }} />
+                        <div style={{ display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+                            <input type="text" placeholder="First Name" style={{ flex: '1 1 200px', minWidth: '0', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-main)' }} />
+                            <input type="text" placeholder="Last Name" style={{ flex: '1 1 200px', minWidth: '0', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-main)' }} />
                         </div>
                         <input type="email" placeholder="Email Address" style={{ padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-main)' }} />
                         <textarea placeholder="Message" rows="5" style={{ padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)', color: 'var(--color-text-main)', resize: 'vertical' }}></textarea>
