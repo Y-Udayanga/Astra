@@ -10,9 +10,9 @@ const About = () => {
             transition={{ duration: 0.5 }}
             style={{ padding: 'var(--spacing-3xl) var(--spacing-xl)', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}
         >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 'var(--spacing-3xl)', alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 'var(--spacing-2xl)', alignItems: 'center' }}>
                 <div>
-                    <h1 style={{ fontSize: '3rem', fontFamily: 'var(--font-family-display)', marginBottom: 'var(--spacing-lg)' }}>About ASTRA</h1>
+                    <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: 'var(--font-family-display)', marginBottom: 'var(--spacing-lg)' }}>About ASTRA</h1>
                     <p style={{ fontSize: '1.2rem', color: 'var(--color-text-muted)', lineHeight: 1.8, marginBottom: 'var(--spacing-md)' }}>
                         Founded in 2026, ASTRA was born out of a desire to create a modern, minimalist wardrobe for the forward-thinking individual. We believe that fashion should be effortless, sustainable, and timeless.
                     </p>
@@ -30,7 +30,7 @@ const About = () => {
                         </div>
                     </div>
                 </div>
-                <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-premium)', height: '600px' }}>
+                <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-premium)', height: 'clamp(300px, 50vw, 600px)' }}>
                     <img src="https://images.unsplash.com/photo-1550614000-4b95d4662d85?auto=format&fit=crop&q=80&w=800" alt="About Astra" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
             </div>

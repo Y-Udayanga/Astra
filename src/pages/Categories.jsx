@@ -19,12 +19,12 @@ const Categories = () => {
             transition={{ duration: 0.5 }}
             style={{ padding: 'var(--spacing-3xl) var(--spacing-xl)', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}
         >
-            <h1 style={{ fontSize: '3rem', fontFamily: 'var(--font-family-display)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>Categories</h1>
+            <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontFamily: 'var(--font-family-display)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>Categories</h1>
             <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-3xl)', fontSize: '1.2rem' }}>
                 Browse our collection by category.
             </p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-xl)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 'var(--spacing-xl)' }}>
                 {categories.map((cat, i) => (
                     <motion.div
                         key={cat.name}
