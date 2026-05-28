@@ -79,7 +79,7 @@ const Login = () => {
                     width: '100%',
                     maxWidth: '420px',
                     backgroundColor: 'var(--color-surface)',
-                    padding: '40px',
+                    padding: 'clamp(24px, 5vw, 40px)',
                     borderRadius: '24px',
                     boxShadow: 'var(--shadow-premium)',
                     position: 'relative',
@@ -176,10 +176,10 @@ const Login = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: 'var(--color-text-muted)' }}>
-                            <input type="checkbox" style={{ accentColor: 'var(--color-primary)' }} />
+                            <input type="checkbox" style={{ accentColor: 'var(--color-accent)' }} />
                             Remember me
                         </label>
-                        <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 500 }}>Forgot Password?</a>
+                        <a href="#" style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 500 }}>Forgot Password?</a>
                     </div>
 
                     <button
@@ -187,8 +187,8 @@ const Login = () => {
                         style={{
                             width: '100%',
                             padding: '14px',
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'var(--color-primary-text)',
+                            backgroundColor: 'var(--color-accent)',
+                            color: '#ffffff',
                             borderRadius: '12px',
                             fontWeight: 600,
                             cursor: isSubmitting ? 'not-allowed' : 'pointer',
@@ -257,7 +257,7 @@ const Login = () => {
                 </div>
 
                 <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--color-text-muted)' }}>
-                    Don't have an account? <Link to="/register" style={{ color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'none' }}>Create account</Link>
+                    Don't have an account? <Link to="/register" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none' }}>Create account</Link>
                 </p>
 
             </motion.div>
