@@ -13,7 +13,7 @@ const Settings = () => {
             <div style={{ maxWidth: '800px' }}>
                 <div style={{
                     backgroundColor: 'var(--color-surface)',
-                    padding: '32px',
+                    padding: 'clamp(20px, 3vw, 32px)',
                     borderRadius: '12px',
                     border: '1px solid var(--color-border)',
                     marginBottom: '24px'
@@ -42,7 +42,7 @@ const Settings = () => {
 
                 <div style={{ textAlign: 'right' }}>
                     <button style={{
-                        backgroundColor: 'var(--color-primary)',
+                        backgroundColor: 'var(--color-accent)',
                         color: 'white',
                         border: 'none',
                         padding: '12px 32px',
