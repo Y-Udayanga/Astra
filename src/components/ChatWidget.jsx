@@ -31,7 +31,7 @@ const ChatWidget = () => {
 
     return (
         <>
-            <div style={{ position: 'fixed', bottom: 'var(--spacing-xl)', right: 'var(--spacing-xl)', zIndex: 100 }}>
+            <div style={{ position: 'fixed', bottom: 'var(--spacing-lg)', right: 'var(--spacing-lg)', zIndex: 100 }}>
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
@@ -42,8 +42,8 @@ const ChatWidget = () => {
                                 position: 'absolute',
                                 bottom: '80px',
                                 right: '0',
-                                width: '350px',
-                                height: '500px',
+                                width: 'min(350px, calc(100vw - 40px))',
+                                height: 'min(500px, calc(100vh - 140px))',
                                 backgroundColor: 'var(--color-surface)',
                                 borderRadius: 'var(--radius-lg)',
                                 boxShadow: 'var(--shadow-premium)',
@@ -131,8 +131,8 @@ const ChatWidget = () => {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     style={{
-                        width: '60px',
-                        height: '60px',
+                        width: '56px',
+                        height: '56px',
                         borderRadius: '50%',
                         backgroundColor: 'var(--color-accent)',
                         color: 'white',
