@@ -121,7 +121,7 @@ const Checkout = () => {
 
             <h1 style={{ marginBottom: 'var(--spacing-2xl)', borderBottom: '1px solid var(--color-border)', paddingBottom: 'var(--spacing-md)' }}>Checkout</h1>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-3xl)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 'var(--spacing-2xl)' }}>
                 {/* Form */}
                 <div>
                     <h3 style={{ marginBottom: 'var(--spacing-lg)' }}>Shipping Information</h3>
@@ -134,7 +134,7 @@ const Checkout = () => {
                         <Input name="address" placeholder="Street Address" required />
 
                         <h3 style={{ marginTop: 'var(--spacing-lg)', marginBottom: 'var(--spacing-sm)' }}>Payment Method</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: 'var(--spacing-md)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '10px', marginBottom: 'var(--spacing-md)' }}>
                             <PaymentOption
                                 id="card"
                                 selected={paymentMethod === 'card'}
@@ -200,8 +200,8 @@ const Checkout = () => {
                             width: '100%',
                             marginTop: 'var(--spacing-xl)',
                             padding: 'var(--spacing-md)',
-                            backgroundColor: 'var(--color-text-main)',
-                            color: 'var(--color-background)',
+                            backgroundColor: 'var(--color-accent)',
+                            color: '#ffffff',
                             fontSize: '1rem',
                             fontWeight: 600,
                             borderRadius: 'var(--radius-md)',
