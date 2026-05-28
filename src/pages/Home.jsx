@@ -193,8 +193,8 @@ const Home = () => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                             {/* Glassmorphism floating badge */}
-                            <motion.div 
-                                animate={{ y: [0, -10, 0] }} 
+                            <motion.div
+                                animate={{ y: [0, -10, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                 style={{
                                     position: 'absolute',
@@ -271,8 +271,8 @@ const Home = () => {
 
             {/* Infinite Marquee Section */}
             <div style={{ backgroundColor: 'var(--color-text-main)', color: 'var(--color-background)', padding: '16px 0', overflow: 'hidden', display: 'flex', whiteSpace: 'nowrap' }}>
-                <motion.div 
-                    animate={{ x: ["0%", "-50%"] }} 
+                <motion.div
+                    animate={{ x: ["0%", "-50%"] }}
                     transition={{ duration: 20, ease: "linear", repeat: Infinity }}
                     style={{ display: 'flex', gap: '3rem', fontSize: '1.2rem', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}
                 >
@@ -431,7 +431,7 @@ const Home = () => {
                                     }}>
                                         <div>
                                             <h3 style={{ color: 'white', fontSize: '2rem', fontWeight: 700, marginBottom: '8px' }}>{cat.name}</h3>
-                                            <motion.div 
+                                            <motion.div
                                                 variants={{ initial: { x: -10, opacity: 0 }, hover: { x: 0, opacity: 1 } }}
                                                 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#e2e8f0', fontWeight: 500 }}
                                             >
@@ -450,7 +450,7 @@ const Home = () => {
             <section style={{ padding: 'calc(var(--spacing-3xl) * 2) var(--spacing-xl)', backgroundColor: 'var(--color-surface)' }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-3xl)' }}>
-                        <motion.h2 
+                        <motion.h2
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -462,28 +462,28 @@ const Home = () => {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 'var(--spacing-md)', gridAutoRows: 'minmax(100px, auto)' }}>
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}
                             style={{ gridColumn: 'span 12', gridRow: 'span 4', sm: { gridColumn: 'span 6' }, md: { gridColumn: 'span 5' }, borderRadius: '24px', overflow: 'hidden', height: '500px' }}
                         >
                             <motion.img whileHover={{ scale: 1.05 }} transition={{ duration: 0.8 }} src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=800" alt="Lookbook 1" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}
                             style={{ gridColumn: 'span 12', gridRow: 'span 2', sm: { gridColumn: 'span 6' }, md: { gridColumn: 'span 7' }, borderRadius: '24px', overflow: 'hidden', height: '240px' }}
                         >
                             <motion.img whileHover={{ scale: 1.05 }} transition={{ duration: 0.8 }} src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1200" alt="Lookbook 2" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}
                             style={{ gridColumn: 'span 12', gridRow: 'span 2', sm: { gridColumn: 'span 6' }, md: { gridColumn: 'span 4' }, borderRadius: '24px', overflow: 'hidden', height: '240px' }}
                         >
                             <motion.img whileHover={{ scale: 1.05 }} transition={{ duration: 0.8 }} src="https://images.unsplash.com/photo-1485230405346-71acb9518d9c?auto=format&fit=crop&q=80&w=600" alt="Lookbook 3" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.3 }}
                             style={{ gridColumn: 'span 12', gridRow: 'span 2', sm: { gridColumn: 'span 6' }, md: { gridColumn: 'span 3' }, borderRadius: '24px', overflow: 'hidden', height: '240px' }}
                         >
@@ -500,23 +500,23 @@ const Home = () => {
                     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                         <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontFamily: 'var(--font-family-display)', fontWeight: 800, marginBottom: '20px', color: 'var(--color-text-main)' }}>Join the Inner Circle</h2>
                         <p style={{ color: 'var(--color-text-muted)', fontSize: '1.2rem', marginBottom: '40px', lineHeight: 1.6 }}>Subscribe to receive early access to new collections, exclusive events, and insider-only promotions.</p>
-                        
+
                         <div style={{ display: 'flex', gap: '12px', maxWidth: '500px', margin: '0 auto', flexDirection: 'column', sm: { flexDirection: 'row' } }}>
                             <div style={{ display: 'flex', width: '100%', gap: '10px' }}>
-                                <input 
-                                    type="email" 
-                                    placeholder="Enter your email address" 
-                                    style={{ 
-                                        flex: 1, 
-                                        padding: '16px 24px', 
-                                        borderRadius: 'var(--radius-full)', 
-                                        border: '1px solid var(--color-border)', 
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email address"
+                                    style={{
+                                        flex: 1,
+                                        padding: '16px 24px',
+                                        borderRadius: 'var(--radius-full)',
+                                        border: '1px solid var(--color-border)',
                                         backgroundColor: 'var(--color-background)',
                                         color: 'var(--color-text-main)',
                                         fontSize: '1rem',
                                         outline: 'none',
                                         boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
-                                    }} 
+                                    }}
                                 />
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}

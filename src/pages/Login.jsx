@@ -260,11 +260,6 @@ const Login = () => {
                     Don't have an account? <Link to="/register" style={{ color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'none' }}>Create account</Link>
                 </p>
 
-                <div style={{ marginTop: '20px', padding: '12px', background: 'rgba(var(--color-primary-rgb), 0.1)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>
-                    <p style={{ fontWeight: 'bold', marginBottom: '4px' }}>Demo Credentials:</p>
-                    <p>Admin: admin@astra.com / any</p>
-                    <p>User: user@astra.com / any</p>
-                </div>
             </motion.div>
         </motion.div>
     );

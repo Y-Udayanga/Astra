@@ -1,5 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../utils/supabase';
 
 const AuthContext = createContext();
 
@@ -9,74 +9,88 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    // Initial state: checking if user is logged in
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage for persisted user
-        const storedUser = localStorage.getItem('astra_user');
-        if (storedUser) {
-            try {
-                // eslint-disable-next-line react-hooks/set-state-in-effect
-                setCurrentUser(JSON.parse(storedUser));
-            } catch (e) {
-                console.error("Failed to parse stored user", e);
-                localStorage.removeItem('astra_user');
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
+                const userObj = {
+                    ...session.user,
+                    role: session.user.email === 'admin@astra.com' ? 'admin' : 'user',
+                    name: session.user.user_metadata?.name || 'User',
+                    avatar: `https://ui-avatars.com/api/?name=${(session.user.user_metadata?.name || 'User').replace(' ', '+')}&background=random`
+                };
+                setCurrentUser(userObj);
+            } else {
+                setCurrentUser(null);
             }
-        }
-        setLoading(false);
+            setLoading(false);
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                const userObj = {
+                    ...session.user,
+                    role: session.user.email === 'admin@astra.com' ? 'admin' : 'user',
+                    name: session.user.user_metadata?.name || 'User',
+                    avatar: `https://ui-avatars.com/api/?name=${(session.user.user_metadata?.name || 'User').replace(' ', '+')}&background=random`
+                };
+                setCurrentUser(userObj);
+            } else {
+                setCurrentUser(null);
+            }
+            setLoading(false);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     const login = async (email, password) => {
-        // Mock authentication
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                if (email === 'admin@astra.com') {
-                    const user = {
-                        email,
-                        role: 'admin',
-                        name: 'Admin User',
-                        avatar: 'https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff'
-                    };
-                    setCurrentUser(user);
-                    localStorage.setItem('astra_user', JSON.stringify(user));
-                    resolve(user);
-                } else {
-                    const user = {
-                        email,
-                        role: 'user',
-                        name: 'Demo User',
-                        avatar: `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=random`
-                    };
-                    setCurrentUser(user);
-                    localStorage.setItem('astra_user', JSON.stringify(user));
-                    resolve(user);
-                }
-            }, 800); // Simulate network delay
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
         });
+        if (error) throw error;
+        
+        const userObj = {
+            ...data.user,
+            role: data.user.email === 'admin@astra.com' ? 'admin' : 'user',
+            name: data.user.user_metadata?.name || 'User',
+            avatar: `https://ui-avatars.com/api/?name=${(data.user.user_metadata?.name || 'User').replace(' ', '+')}&background=random`
+        };
+        setCurrentUser(userObj);
+        return userObj;
     };
 
     const register = async (name, email, password) => {
-        // Mock registration
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const user = {
-                    email,
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
                     name,
-                    role: 'user',
-                    avatar: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=random`
-                };
-                setCurrentUser(user);
-                localStorage.setItem('astra_user', JSON.stringify(user));
-                resolve(user);
-            }, 800);
+                }
+            }
         });
+        if (error) throw error;
+
+        if (data.user) {
+             const userObj = {
+                ...data.user,
+                role: data.user.email === 'admin@astra.com' ? 'admin' : 'user',
+                name: name,
+                avatar: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=random`
+            };
+            setCurrentUser(userObj);
+            return userObj;
+        }
+        return null;
     };
 
-    const logout = () => {
+    const logout = async () => {
+        await supabase.auth.signOut();
         setCurrentUser(null);
-        localStorage.removeItem('astra_user');
     };
 
     const value = {
