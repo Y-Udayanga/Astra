@@ -74,7 +74,7 @@ const Register = () => {
                     width: '100%',
                     maxWidth: '420px',
                     backgroundColor: 'var(--color-surface)',
-                    padding: '40px',
+                    padding: 'clamp(24px, 5vw, 40px)',
                     borderRadius: '24px',
                     boxShadow: 'var(--shadow-premium)',
                     position: 'relative',
@@ -180,7 +180,7 @@ const Register = () => {
                         style={{
                             width: '100%',
                             padding: '14px',
-                            backgroundColor: 'var(--color-primary)',
+                            backgroundColor: 'var(--color-accent)',
                             color: '#ffffff',
                             borderRadius: '12px',
                             fontWeight: 600,
@@ -208,7 +208,7 @@ const Register = () => {
                 </form>
 
                 <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--color-text-muted)' }}>
-                    Already have an account? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link>
+                    Already have an account? <Link to="/login" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link>
                 </p>
             </motion.div>
         </motion.div>
