@@ -5,14 +5,14 @@ import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
 const Products = () => {
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                 <div>
                     <h1 style={{ fontFamily: 'var(--font-family-display)', fontSize: '2rem', marginBottom: '8px' }}>Products</h1>
                     <p style={{ color: 'var(--color-text-muted)' }}>Manage your product catalog</p>
                 </div>
                 <button style={{
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'var(--color-primary-text)',
+                    backgroundColor: 'var(--color-accent)',
+                    color: '#ffffff',
                     border: 'none',
                     padding: '12px 24px',
                     borderRadius: '8px',
@@ -34,7 +34,7 @@ const Products = () => {
                 overflow: 'hidden'
             }}>
                 {/* Filters Bar */}
-                <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '16px', alignItems: 'center' }}>
+                <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
                         <Search size={18} color="var(--color-text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
                         <input
@@ -46,6 +46,7 @@ const Products = () => {
                                 borderRadius: '8px',
                                 border: '1px solid var(--color-border)',
                                 backgroundColor: 'var(--color-background)',
+                                color: 'var(--color-text-main)',
                                 outline: 'none'
                             }}
                         />
