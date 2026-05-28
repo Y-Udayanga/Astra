@@ -18,6 +18,7 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
 }
 
 h1,
@@ -74,3 +75,40 @@ ol {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-muted);
 }
+
+/* ===== RESPONSIVE OVERRIDES ===== */
+
+/* Ensure inputs inherit font */
+input, textarea, select {
+    font-family: inherit;
+}
+
+/* Responsive helper: admin sidebar */
+@media (min-width: 1025px) {
+    .admin-sidebar-close-btn { display: none !important; }
+    .admin-sidebar-toggle { display: none !important; }
+    .admin-sidebar { transform: translateX(0) !important; position: sticky !important; }
+    .admin-topbar-search { display: block !important; }
+    .admin-user-info { display: block !important; }
+}
+
+@media (max-width: 1024px) {
+    .admin-sidebar-close-btn { display: block !important; }
+    .admin-sidebar-toggle { display: block !important; }
+    .admin-sidebar { position: fixed !important; }
+    .admin-sidebar.closed { transform: translateX(-100%) !important; }
+    .admin-sidebar.open { transform: translateX(0) !important; }
+    .admin-topbar-search { display: none !important; }
+}
+
+@media (max-width: 768px) {
+    .admin-user-info { display: none !important; }
+}
+
+/* Mobile responsive overrides for page content */
+@media (max-width: 480px) {
+    /* Tighten padding on very small screens */
+    body {
+        font-size: 15px;
+    }
+}
