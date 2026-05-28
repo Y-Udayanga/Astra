@@ -37,7 +37,7 @@ const Dashboard = () => {
                 animate="visible"
                 style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
                     gap: '24px',
                     marginBottom: '32px'
                 }}
@@ -84,7 +84,7 @@ const Dashboard = () => {
                 ))}
             </motion.div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: '24px' }}>
                 {/* Recent Orders Placeholder */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -100,9 +100,10 @@ const Dashboard = () => {
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Recent Orders</h3>
-                        <button style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 500 }}>View All</button>
+                        <button style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 500 }}>View All</button>
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                    <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', minWidth: '400px' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
                                 <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Order ID</th>
@@ -132,6 +133,7 @@ const Dashboard = () => {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </motion.div>
 
                 {/* Sales Chart Placeholder */}
@@ -158,7 +160,7 @@ const Dashboard = () => {
                             <div key={i} style={{
                                 width: '100%',
                                 height: `${h}%`,
-                                backgroundColor: 'var(--color-primary)',
+                                backgroundColor: 'var(--color-accent)',
                                 borderRadius: '4px 4px 0 0',
                                 opacity: 0.8
                             }}></div>
