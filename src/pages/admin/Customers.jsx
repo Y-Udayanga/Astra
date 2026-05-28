@@ -12,7 +12,7 @@ const Customers = () => {
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(min(260px, 100%), 1fr))',
                 gap: '24px'
             }}>
                 {[1, 2, 3, 4, 5, 6].map((id) => (
@@ -57,8 +57,8 @@ const Customers = () => {
                             marginTop: '20px',
                             padding: '8px 24px',
                             borderRadius: '20px',
-                            border: '1px solid var(--color-primary)',
-                            color: 'var(--color-primary)',
+                            border: '1px solid var(--color-accent)',
+                            color: 'var(--color-accent)',
                             background: 'none',
                             cursor: 'pointer',
                             fontWeight: 500,
