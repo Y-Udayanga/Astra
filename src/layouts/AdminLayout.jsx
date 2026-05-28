@@ -42,12 +42,12 @@ const AdminLayout = () => {
                         animate={{ opacity: 0.5 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setSidebarOpen(false)}
+                        className="admin-sidebar-backdrop"
                         style={{
                             position: 'fixed',
                             inset: 0,
                             backgroundColor: '#000',
-                            zIndex: 40,
-                            display: window.innerWidth > 1024 ? 'none' : 'block' // Only on mobile
+                            zIndex: 40
                         }}
                     />
                 )}
@@ -55,32 +55,30 @@ const AdminLayout = () => {
 
             {/* Sidebar */}
             <motion.aside
-                className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}
+                className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}
                 style={{
                     width: '260px',
                     backgroundColor: 'var(--color-surface)',
                     borderRight: '1px solid var(--color-border)',
                     height: '100vh',
-                    position: 'sticky',
                     top: 0,
                     display: 'flex',
                     flexDirection: 'column',
                     zIndex: 50,
                     transition: 'transform 0.3s ease',
-                    // Using CSS class for responsive hiding logic in index.css later, or inline logic here
-                    // For now, simpler responsive logic:
-                    ...(window.innerWidth <= 1024 ? {
-                        position: 'fixed',
-                        transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)'
-                    } : {})
+                    flexShrink: 0
                 }}
             >
                 <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--color-primary), var(--color-accent))', borderRadius: '8px' }}></div>
+                        <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--color-accent), #ec4899)', borderRadius: '8px' }}></div>
                         <span style={{ fontWeight: 'bold', fontSize: '1.2rem', fontFamily: 'var(--font-family-display)' }}>ASTRA Admin</span>
                     </div>
-                    <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: window.innerWidth > 1024 ? 'none' : 'block' }}>
+                    <button
+                        className="admin-sidebar-close-btn"
+                        onClick={() => setSidebarOpen(false)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
                         <X size={20} color="var(--color-text-muted)" />
                     </button>
                 </div>
@@ -101,8 +99,8 @@ const AdminLayout = () => {
                                             padding: '12px 16px',
                                             borderRadius: '8px',
                                             textDecoration: 'none',
-                                            color: isActive ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                                            backgroundColor: isActive ? 'rgba(var(--color-primary-rgb), 0.1)' : 'transparent',
+                                            color: isActive ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                                            backgroundColor: isActive ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
                                             fontWeight: isActive ? 600 : 500,
                                             transition: 'all 0.2s'
                                         }}
@@ -128,7 +126,7 @@ const AdminLayout = () => {
                             borderRadius: '8px',
                             background: 'none',
                             border: '1px solid var(--color-border)',
-                            color: 'var(--color-text-danger)',
+                            color: 'var(--color-error)',
                             cursor: 'pointer',
                             transition: 'all 0.2s'
                         }}
@@ -155,10 +153,14 @@ const AdminLayout = () => {
                     zIndex: 30
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <button onClick={toggleSidebar} style={{ background: 'none', border: 'none', cursor: 'pointer', display: window.innerWidth > 1024 ? 'none' : 'block' }}>
+                        <button
+                            className="admin-sidebar-toggle"
+                            onClick={toggleSidebar}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                        >
                             <Menu size={24} color="var(--color-text-main)" />
                         </button>
-                        <div style={{ position: 'relative', display: 'none' }}> {/* Hidden on mobile for simplicity */}
+                        <div className="admin-topbar-search" style={{ position: 'relative' }}>
                             <Search size={18} color="var(--color-text-muted)" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
                             <input
                                 type="text"
@@ -168,6 +170,7 @@ const AdminLayout = () => {
                                     borderRadius: '6px',
                                     border: '1px solid var(--color-border)',
                                     backgroundColor: 'var(--color-background)',
+                                    color: 'var(--color-text-main)',
                                     outline: 'none',
                                     width: '240px'
                                 }}
@@ -178,10 +181,10 @@ const AdminLayout = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                         <button style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}>
                             <Bell size={20} color="var(--color-text-muted)" />
-                            <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', backgroundColor: 'var(--color-heart)', borderRadius: '50%' }}></span>
+                            <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', backgroundColor: 'var(--color-error)', borderRadius: '50%' }}></span>
                         </button>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ textAlign: 'right', display: window.innerWidth > 768 ? 'block' : 'none' }}>
+                            <div className="admin-user-info" style={{ textAlign: 'right' }}>
                                 <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser?.name || "Admin"}</div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Administrator</div>
                             </div>
@@ -200,7 +203,7 @@ const AdminLayout = () => {
                     </div>
                 </header>
 
-                <main style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
+                <main style={{ flex: 1, padding: 'clamp(12px, 2vw, 24px)', overflowY: 'auto' }}>
                     <Outlet />
                 </main>
             </div>
