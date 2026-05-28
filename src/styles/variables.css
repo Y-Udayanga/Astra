@@ -13,6 +13,11 @@
   --color-success: #10b981;
   --color-primary-text: #ffffff;
 
+  /* Interactive / Button colors for light mode clarity */
+  --color-btn-primary-bg: #111827;
+  --color-btn-primary-text: #ffffff;
+  --color-link-accent: #6366f1;
+
   /* Typography */
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-family-display: 'Outfit', sans-serif; /* For headers */
@@ -55,4 +60,10 @@
   --color-surface: #18181b;
   --color-border: #27272a;
   --color-primary-text: #09090b;
+
+  /* Interactive / Button colors for dark mode */
+  --color-btn-primary-bg: #f9fafb;
+  --color-btn-primary-text: #09090b;
+  --color-link-accent: #818cf8;
 }
+

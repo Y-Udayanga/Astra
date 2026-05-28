@@ -12,7 +12,7 @@ const Footer = () => {
                 maxWidth: '1200px',
                 margin: '0 auto',
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
                 gap: 'var(--spacing-2xl)'
             }}>
                 {/* Brand */}
@@ -62,16 +62,19 @@ const Footer = () => {
                             placeholder="Enter your email"
                             style={{
                                 flex: 1,
+                                minWidth: '0',
                                 padding: 'var(--spacing-sm) var(--spacing-md)',
                                 borderRadius: 'var(--radius-md)',
                                 border: '1px solid var(--color-border)',
                                 outline: 'none',
-                                fontFamily: 'inherit'
+                                fontFamily: 'inherit',
+                                backgroundColor: 'var(--color-background)',
+                                color: 'var(--color-text-main)'
                             }}
                         />
                         <button style={{
-                            backgroundColor: 'var(--color-primary)',
-                            color: 'var(--color-background)',
+                            backgroundColor: 'var(--color-accent)',
+                            color: '#ffffff',
                             padding: 'var(--spacing-sm) var(--spacing-md)',
                             borderRadius: 'var(--radius-md)',
                             display: 'flex',
