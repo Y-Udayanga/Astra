@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 
