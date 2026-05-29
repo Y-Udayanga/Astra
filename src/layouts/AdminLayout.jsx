@@ -75,6 +75,7 @@ const AdminLayout = () => {
                         <span style={{ fontWeight: 'bold', fontSize: '1.2rem', fontFamily: 'var(--font-family-display)' }}>ASTRA Admin</span>
                     </div>
                     <button
+                        type="button"
                         className="admin-sidebar-close-btn"
                         onClick={() => setSidebarOpen(false)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer' }}
@@ -116,6 +117,7 @@ const AdminLayout = () => {
 
                 <div style={{ padding: '24px', borderTop: '1px solid var(--color-border)' }}>
                     <button
+                        type="button"
                         onClick={logout}
                         style={{
                             width: '100%',
@@ -154,6 +156,7 @@ const AdminLayout = () => {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <button
+                            type="button"
                             className="admin-sidebar-toggle"
                             onClick={toggleSidebar}
                             style={{ background: 'none', border: 'none', cursor: 'pointer' }}
@@ -179,7 +182,11 @@ const AdminLayout = () => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <button style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}>
+                        <button
+                            type="button"
+                            onClick={() => window.alert('No new notifications.')}
+                            style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}
+                        >
                             <Bell size={20} color="var(--color-text-muted)" />
                             <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', backgroundColor: 'var(--color-error)', borderRadius: '50%' }}></span>
                         </button>

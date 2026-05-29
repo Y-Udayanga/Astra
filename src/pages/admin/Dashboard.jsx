@@ -1,14 +1,60 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { DollarSign, ShoppingBag, Users, TrendingUp } from 'lucide-react';
+import { getCustomers, getOrders, getProducts } from '../../services/api';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+    const [summary, setSummary] = useState({
+        totalRevenue: 0,
+        totalOrders: 0,
+        totalCustomers: 0,
+        activeProducts: 0,
+    });
+    const [recentOrders, setRecentOrders] = useState([]);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        let active = true;
+
+        const loadDashboard = async () => {
+            const [products, orders, customers] = await Promise.all([
+                getProducts(),
+                getOrders(),
+                getCustomers(),
+            ]);
+
+            if (!active) {
+                return;
+            }
+
+            const totalRevenue = orders.reduce((sum, order) => sum + Number(order.amount ?? 0), 0);
+
+            setSummary({
+                totalRevenue,
+                totalOrders: orders.length,
+                totalCustomers: customers.length,
+                activeProducts: products.filter((product) => product.status === 'active').length,
+            });
+            setRecentOrders(orders.slice(0, 4));
+        };
+
+        loadDashboard().catch((error) => {
+            console.error('Failed to load dashboard data', error);
+            setError(error.message);
+        });
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
     const stats = [
-        { label: 'Total Revenue', value: '$24,500', change: '+12%', icon: DollarSign, color: 'var(--color-primary)' },
-        { label: 'Total Orders', value: '1,250', change: '+5%', icon: ShoppingBag, color: 'var(--color-accent)' },
-        { label: 'New Customers', value: '340', change: '+18%', icon: Users, color: '#10B981' }, // Emerald
-        { label: 'Growth', value: '23%', change: '+4%', icon: TrendingUp, color: '#F59E0B' }, // Amber
+        { label: 'Total Revenue', value: `$${summary.totalRevenue.toLocaleString()}`, change: 'Live data', icon: DollarSign, color: '#6366F1' },
+        { label: 'Total Orders', value: summary.totalOrders.toString(), change: 'Live data', icon: ShoppingBag, color: '#EC4899' },
+        { label: 'New Customers', value: summary.totalCustomers.toString(), change: 'Live data', icon: Users, color: '#10B981' },
+        { label: 'Active Products', value: summary.activeProducts.toString(), change: 'Live data', icon: TrendingUp, color: '#F59E0B' },
     ];
 
     const containerVariants = {
@@ -30,6 +76,10 @@ const Dashboard = () => {
                 <h1 style={{ fontFamily: 'var(--font-family-display)', fontSize: '2rem', marginBottom: '8px' }}>Dashboard Overview</h1>
                 <p style={{ color: 'var(--color-text-muted)' }}>Welcome back! Here's what's happening today.</p>
             </div>
+
+            {error && (
+                <div style={{ marginBottom: '16px', color: 'var(--color-error)' }}>{error}</div>
+            )}
 
             <motion.div
                 variants={containerVariants}
@@ -69,13 +119,13 @@ const Dashboard = () => {
                                 padding: '2px 8px',
                                 borderRadius: '4px'
                             }}>
-                                {stat.change} from last month
+                                {stat.change}
                             </span>
                         </div>
                         <div style={{
                             padding: '12px',
                             borderRadius: '12px',
-                            backgroundColor: `${stat.color}20`, // 20% opacity 
+                            backgroundColor: `${stat.color}20`,
                             color: stat.color
                         }}>
                             <stat.icon size={24} />
@@ -85,7 +135,6 @@ const Dashboard = () => {
             </motion.div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))', gap: '24px' }}>
-                {/* Recent Orders Placeholder */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -100,43 +149,56 @@ const Dashboard = () => {
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Recent Orders</h3>
-                        <button style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 500 }}>View All</button>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/admin/orders')}
+                            style={{ background: 'none', border: 'none', color: 'var(--color-accent)', cursor: 'pointer', fontWeight: 500 }}
+                        >
+                            View All
+                        </button>
                     </div>
                     <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', minWidth: '400px' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
-                                <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Order ID</th>
-                                <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Customer</th>
-                                <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Status</th>
-                                <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500, textAlign: 'right' }}>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {[1001, 1002, 1003, 1004].map((id) => (
-                                <tr key={id} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                    <td style={{ padding: '16px 0', fontWeight: 500 }}>#{id}</td>
-                                    <td style={{ padding: '16px 0' }}>John Doe</td>
-                                    <td style={{ padding: '16px 0' }}>
-                                        <span style={{
-                                            padding: '4px 12px',
-                                            borderRadius: '20px',
-                                            fontSize: '0.8rem',
-                                            backgroundColor: id % 2 === 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                            color: id % 2 === 0 ? '#10B981' : '#F59E0B'
-                                        }}>
-                                            {id % 2 === 0 ? 'Completed' : 'Pending'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '16px 0', textAlign: 'right' }}>$120.00</td>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem', minWidth: '400px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--color-border)', textAlign: 'left' }}>
+                                    <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Order ID</th>
+                                    <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Customer</th>
+                                    <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500 }}>Status</th>
+                                    <th style={{ padding: '12px 0', color: 'var(--color-text-muted)', fontWeight: 500, textAlign: 'right' }}>Amount</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {recentOrders.length > 0 ? (
+                                    recentOrders.map((order) => (
+                                        <tr key={order.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                            <td style={{ padding: '16px 0', fontWeight: 500 }}>{order.id}</td>
+                                            <td style={{ padding: '16px 0' }}>{order.customer}</td>
+                                            <td style={{ padding: '16px 0' }}>
+                                                <span style={{
+                                                    padding: '4px 12px',
+                                                    borderRadius: '20px',
+                                                    fontSize: '0.8rem',
+                                                    backgroundColor: order.status === 'completed' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                                    color: order.status === 'completed' ? '#10B981' : '#F59E0B'
+                                                }}>
+                                                    {order.status}
+                                                </span>
+                                            </td>
+                                            <td style={{ padding: '16px 0', textAlign: 'right' }}>
+                                                {order.currency} {Number(order.amount ?? 0).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={4} style={{ padding: '16px 0', color: 'var(--color-text-muted)' }}>No orders yet.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </motion.div>
 
-                {/* Sales Chart Placeholder */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -163,7 +225,7 @@ const Dashboard = () => {
                                 backgroundColor: 'var(--color-accent)',
                                 borderRadius: '4px 4px 0 0',
                                 opacity: 0.8
-                            }}></div>
+                            }} />
                         ))}
                     </div>
                     <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>

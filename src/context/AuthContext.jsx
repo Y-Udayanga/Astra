@@ -1,11 +1,55 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 
 const AuthContext = createContext();
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
     return useContext(AuthContext);
+};
+
+const buildUserProfile = (user) => {
+    if (!user) {
+        return null;
+    }
+
+    const name = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+
+    return {
+        ...user,
+        role: user.email === 'admin@astra.com' ? 'admin' : 'user',
+        name,
+        avatar: `https://ui-avatars.com/api/?name=${name.replaceAll(' ', '+')}&background=random`,
+    };
+};
+
+const loadUserProfile = async (user) => {
+    if (!user) {
+        return null;
+    }
+
+    const fallback = buildUserProfile(user);
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('name, role, avatar_url')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (error) {
+        console.error('Failed to load profile row', error);
+        return fallback;
+    }
+
+    if (!data) {
+        return fallback;
+    }
+
+    return {
+        ...user,
+        role: data.role ?? fallback.role,
+        name: data.name ?? fallback.name,
+        avatar: data.avatar_url ?? fallback.avatar,
+    };
 };
 
 export const AuthProvider = ({ children }) => {
@@ -13,37 +57,42 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) {
-                const userObj = {
-                    ...session.user,
-                    role: session.user.email === 'admin@astra.com' ? 'admin' : 'user',
-                    name: session.user.user_metadata?.name || 'User',
-                    avatar: `https://ui-avatars.com/api/?name=${(session.user.user_metadata?.name || 'User').replace(' ', '+')}&background=random`
-                };
-                setCurrentUser(userObj);
-            } else {
-                setCurrentUser(null);
+        let active = true;
+
+        const loadSession = async () => {
+            const { data: { session }, error } = await supabase.auth.getSession();
+
+            if (error) {
+                console.error('Failed to load Supabase session', error);
             }
+
+            if (!active) {
+                return;
+            }
+
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setCurrentUser(await loadUserProfile(session?.user ?? null));
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setLoading(false);
+        };
+
+        void loadSession();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            if (!active) {
+                return;
+            }
+
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setCurrentUser(await loadUserProfile(session?.user ?? null));
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setLoading(false);
         });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-                const userObj = {
-                    ...session.user,
-                    role: session.user.email === 'admin@astra.com' ? 'admin' : 'user',
-                    name: session.user.user_metadata?.name || 'User',
-                    avatar: `https://ui-avatars.com/api/?name=${(session.user.user_metadata?.name || 'User').replace(' ', '+')}&background=random`
-                };
-                setCurrentUser(userObj);
-            } else {
-                setCurrentUser(null);
-            }
-            setLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
+        return () => {
+            active = false;
+            subscription.unsubscribe();
+        };
     }, []);
 
     const login = async (email, password) => {
@@ -52,13 +101,8 @@ export const AuthProvider = ({ children }) => {
             password,
         });
         if (error) throw error;
-        
-        const userObj = {
-            ...data.user,
-            role: data.user.email === 'admin@astra.com' ? 'admin' : 'user',
-            name: data.user.user_metadata?.name || 'User',
-            avatar: `https://ui-avatars.com/api/?name=${(data.user.user_metadata?.name || 'User').replace(' ', '+')}&background=random`
-        };
+
+        const userObj = await loadUserProfile(data.user);
         setCurrentUser(userObj);
         return userObj;
     };
@@ -76,12 +120,10 @@ export const AuthProvider = ({ children }) => {
         if (error) throw error;
 
         if (data.user) {
-             const userObj = {
+            const userObj = await loadUserProfile({
                 ...data.user,
-                role: data.user.email === 'admin@astra.com' ? 'admin' : 'user',
-                name: name,
-                avatar: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=random`
-            };
+                user_metadata: { ...data.user.user_metadata, name },
+            });
             setCurrentUser(userObj);
             return userObj;
         }
