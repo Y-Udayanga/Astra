@@ -1,112 +1,253 @@
-/**
- * Sandbox API Service
- * 
- * This file acts as a mock backend for the application. It uses localStorage
- * to persist data temporarily. When the real backend is ready, simply replace
- * the logic in these functions with actual fetch/axios calls.
- */
+import { supabase } from '../utils/supabase';
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const mapProduct = (row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description ?? '',
+    price: Number(row.price ?? 0),
+    category: row.category ?? 'Uncategorized',
+    image: row.image_url ?? row.images?.[0] ?? '',
+    images: row.images ?? [],
+    stock: Number(row.stock ?? 0),
+    status: row.status ?? 'active',
+    specs: row.specs ?? {},
+    sellerId: row.seller_id ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+});
 
-const getFromStorage = (key, defaultValue = []) => {
-    try {
-        const item = localStorage.getItem(key);
-        return item ? JSON.parse(item) : defaultValue;
-    } catch (error) {
-        console.error('Error reading from storage', error);
-        return defaultValue;
+const mapOrder = (row) => ({
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    customer: `${row.first_name} ${row.last_name}`.trim(),
+    email: row.email,
+    address: row.address,
+    city: row.city,
+    country: row.country,
+    amount: Number(row.amount ?? 0),
+    currency: row.currency ?? 'USD',
+    paymentMethod: row.payment_method ?? 'card',
+    status: row.status ?? 'pending',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+});
+
+const mapCustomer = (row) => ({
+    id: row.id,
+    name: row.name ?? 'User',
+    email: row.email ?? '',
+    role: row.role ?? 'user',
+    avatar: row.avatar_url ?? `https://ui-avatars.com/api/?name=${(row.name ?? 'User').replaceAll(' ', '+')}&background=random`,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+});
+
+const mapSettings = (row) => ({
+    id: row.id,
+    storeName: row.store_name,
+    supportEmail: row.support_email,
+    currency: row.currency,
+    updatedAt: row.updated_at,
+});
+
+const throwIfError = (error, message) => {
+    if (error) {
+        throw new Error(`${message}: ${error.message}`);
     }
 };
 
-const saveToStorage = (key, data) => {
-    try {
-        localStorage.setItem(key, JSON.stringify(data));
-    } catch (error) {
-        console.error('Error saving to storage', error);
-    }
+const getCurrentUser = async () => {
+    const { data, error } = await supabase.auth.getUser();
+    throwIfError(error, 'Failed to load current user');
+    return data.user ?? null;
 };
 
-// Initial mock data if storage is empty
-const defaultProducts = [
-    { id: 1, name: "Premium Leather Jacket", price: 299, category: "Outerwear", image: "https://images.unsplash.com/photo-1551028919-6a014909a909?auto=format&fit=crop&q=80&w=500" },
-    { id: 2, name: "Minimalist Watch", price: 150, category: "Accessories", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=500" },
-    { id: 3, name: "Designer Sunglasses", price: 120, category: "Accessories", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&q=80&w=500" },
-];
+export const getProducts = async () => {
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    throwIfError(error, 'Failed to load products');
+    return (data ?? []).map(mapProduct);
+};
+
+export const getProduct = async (id) => {
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error?.code === 'PGRST116') {
+        return null;
+    }
+
+    throwIfError(error, 'Failed to load product');
+    return mapProduct(data);
+};
+
+export const createProduct = async (product) => {
+    const user = await getCurrentUser();
+    const payload = {
+        name: product.name,
+        description: product.description ?? '',
+        price: Number(product.price ?? 0),
+        category: product.category ?? 'Uncategorized',
+        image_url: product.image ?? product.image_url ?? '',
+        images: product.images ?? (product.image ? [product.image] : []),
+        stock: Number(product.stock ?? 0),
+        status: product.status ?? 'active',
+        seller_id: product.sellerId ?? user?.id ?? null,
+        specs: product.specs ?? {},
+    };
+
+    const { data, error } = await supabase
+        .from('products')
+        .insert(payload)
+        .select('*')
+        .single();
+
+    throwIfError(error, 'Failed to create product');
+    return mapProduct(data);
+};
+
+export const updateProduct = async (id, updates) => {
+    const payload = {
+        name: updates.name,
+        description: updates.description ?? '',
+        price: Number(updates.price ?? 0),
+        category: updates.category ?? 'Uncategorized',
+        image_url: updates.image ?? updates.image_url ?? '',
+        images: updates.images ?? (updates.image ? [updates.image] : []),
+        stock: Number(updates.stock ?? 0),
+        status: updates.status ?? 'active',
+        specs: updates.specs ?? {},
+    };
+
+    const { data, error } = await supabase
+        .from('products')
+        .update(payload)
+        .eq('id', id)
+        .select('*')
+        .single();
+
+    throwIfError(error, 'Failed to update product');
+    return mapProduct(data);
+};
+
+export const deleteProduct = async (id) => {
+    const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+    throwIfError(error, 'Failed to delete product');
+};
+
+export const getOrders = async () => {
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    throwIfError(error, 'Failed to load orders');
+    return (data ?? []).map(mapOrder);
+};
+
+export const getOrder = async (id) => {
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error?.code === 'PGRST116') {
+        return null;
+    }
+
+    throwIfError(error, 'Failed to load order');
+    return mapOrder(data);
+};
+
+export const createOrder = async (orderData) => {
+    const payload = {
+        id: orderData.id ?? `ORD-${Date.now()}`,
+        user_id: orderData.userId ?? null,
+        first_name: orderData.firstName,
+        last_name: orderData.lastName,
+        email: orderData.email,
+        address: orderData.address,
+        city: orderData.city,
+        country: orderData.country ?? 'Sri Lanka',
+        amount: Number(orderData.amount ?? 0),
+        currency: orderData.currency ?? 'USD',
+        payment_method: orderData.paymentMethod ?? 'card',
+        status: orderData.status ?? 'pending',
+    };
+
+    const { data, error } = await supabase
+        .from('orders')
+        .insert(payload)
+        .select('*')
+        .single();
+
+    throwIfError(error, 'Failed to create order');
+    return mapOrder(data);
+};
+
+export const getCustomers = async () => {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    throwIfError(error, 'Failed to load customers');
+    return (data ?? []).map(mapCustomer);
+};
+
+export const getStoreSettings = async () => {
+    const { data, error } = await supabase
+        .from('store_settings')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+    throwIfError(error, 'Failed to load store settings');
+    const settings = data?.[0];
+    return settings ? mapSettings(settings) : null;
+};
+
+export const saveStoreSettings = async (settings) => {
+    const existing = await getStoreSettings();
+    const payload = {
+        store_name: settings.storeName,
+        support_email: settings.supportEmail,
+        currency: settings.currency,
+    };
+
+    const request = existing
+        ? supabase.from('store_settings').update(payload).eq('id', existing.id)
+        : supabase.from('store_settings').insert(payload);
+
+    const { data, error } = await request.select('*').single();
+    throwIfError(error, 'Failed to save store settings');
+    return mapSettings(data);
+};
 
 export const api = {
-    // Products
-    async getProducts() {
-        await delay(500); // Simulate network latency
-        let products = getFromStorage('astra_products', null);
-        if (!products) {
-            products = defaultProducts;
-            saveToStorage('astra_products', products);
-        }
-        return products;
-    },
-
-    async getProduct(id) {
-        await delay(300);
-        const products = await this.getProducts();
-        return products.find(p => p.id === parseInt(id)) || null;
-    },
-
-    async addProduct(product) {
-        await delay(600);
-        const products = await this.getProducts();
-        const newProduct = { ...product, id: Date.now() };
-        products.push(newProduct);
-        saveToStorage('astra_products', products);
-        return newProduct;
-    },
-
-    // Cart
-    async saveCart(cartItems) {
-        await delay(200);
-        saveToStorage('astra_cart', cartItems);
-    },
-
-    async getCart() {
-        await delay(200);
-        return getFromStorage('astra_cart', []);
-    },
-
-    // Orders
-    async createOrder(orderData) {
-        await delay(800);
-        const orders = getFromStorage('astra_orders', []);
-        const newOrder = {
-            id: `ORD-${Date.now()}`,
-            ...orderData,
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        };
-        orders.push(newOrder);
-        saveToStorage('astra_orders', orders);
-        return newOrder;
-    },
-    
-    // Auth (Mock)
-    async login(email, password) {
-        await delay(800);
-        // Simple mock login
-        if (email && password) {
-            const user = { id: 1, email, name: email.split('@')[0], role: email.includes('admin') ? 'admin' : 'user' };
-            saveToStorage('astra_user', user);
-            return user;
-        }
-        throw new Error('Invalid credentials');
-    },
-
-    async logout() {
-        await delay(300);
-        localStorage.removeItem('astra_user');
-    },
-
-    async getCurrentUser() {
-        await delay(200);
-        return getFromStorage('astra_user', null);
-    }
+    getProducts,
+    getProduct,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+    getOrders,
+    getOrder,
+    createOrder,
+    getCustomers,
+    getStoreSettings,
+    saveStoreSettings,
 };
 
 export default api;
