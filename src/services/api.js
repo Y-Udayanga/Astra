@@ -197,6 +197,22 @@ export const createOrder = async (orderData) => {
     return mapOrder(data);
 };
 
+export const getMyOrders = async () => {
+    const user = await getCurrentUser();
+    if (!user) {
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+    throwIfError(error, 'Failed to load your orders');
+    return (data ?? []).map(mapOrder);
+};
+
 export const getCustomers = async () => {
     const { data, error } = await supabase
         .from('profiles')
@@ -245,6 +261,7 @@ export const api = {
     getOrders,
     getOrder,
     createOrder,
+    getMyOrders,
     getCustomers,
     getStoreSettings,
     saveStoreSettings,

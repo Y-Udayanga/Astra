@@ -4,19 +4,35 @@
   --color-secondary: #f4f4f5;
   --color-accent: #6366f1; /* Indigo-500 */
   --color-accent-hover: #4f46e5;
+  --color-accent-soft: rgba(99, 102, 241, 0.1);
+  --color-accent-2: #ec4899; /* Pink for gradients */
   --color-text-main: #111827;
-  --color-text-muted: #6b7280;
+  --color-text-muted: #4b5563; /* darker than before for stronger contrast */
+  --color-text-subtle: #6b7280;
   --color-background: #ffffff;
-  --color-surface: #fafafa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f4f7;
+  --color-elevated: #ffffff;
   --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
   --color-error: #ef4444;
+  --color-text-danger: #ef4444;
+  --color-warning: #f59e0b;
   --color-success: #10b981;
+  --color-info: #3b82f6;
   --color-primary-text: #ffffff;
 
   /* Interactive / Button colors for light mode clarity */
   --color-btn-primary-bg: #111827;
   --color-btn-primary-text: #ffffff;
-  --color-link-accent: #6366f1;
+  --color-link-accent: #4f46e5;
+
+  /* Brand gradients & glow */
+  --gradient-brand: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+  --gradient-brand-soft: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(236,72,153,0.12) 100%);
+  --shadow-glow: 0 10px 30px -8px rgba(99, 102, 241, 0.45);
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --header-border: rgba(17, 24, 39, 0.08);
 
   /* Typography */
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -51,19 +67,36 @@
 
 .dark {
   --color-primary: #ffffff;
-  --color-secondary: #27272a;
+  --color-secondary: #1c1c20;
   --color-accent: #818cf8;
-  --color-accent-hover: #6366f1;
+  --color-accent-hover: #a5b4fc;
+  --color-accent-soft: rgba(129, 140, 248, 0.16);
+  --color-accent-2: #f472b6;
   --color-text-main: #f9fafb;
-  --color-text-muted: #9ca3af;
-  --color-background: #09090b;
-  --color-surface: #18181b;
-  --color-border: #27272a;
-  --color-primary-text: #09090b;
+  --color-text-muted: #b4bac6; /* brighter for stronger contrast on dark */
+  --color-text-subtle: #8b909c;
+  --color-background: #0a0a0f;
+  --color-surface: #16161d;
+  --color-surface-2: #1f1f29;
+  --color-elevated: #1c1c25;
+  --color-border: #2a2a35;
+  --color-border-strong: #3a3a47;
+  --color-error: #f87171;
+  --color-text-danger: #f87171;
+  --color-warning: #fbbf24;
+  --color-success: #34d399;
+  --color-info: #60a5fa;
+  --color-primary-text: #0a0a0f;
 
   /* Interactive / Button colors for dark mode */
   --color-btn-primary-bg: #f9fafb;
-  --color-btn-primary-text: #09090b;
-  --color-link-accent: #818cf8;
+  --color-btn-primary-text: #0a0a0f;
+  --color-link-accent: #a5b4fc;
+
+  --gradient-brand: linear-gradient(135deg, #818cf8 0%, #f472b6 100%);
+  --gradient-brand-soft: linear-gradient(135deg, rgba(129,140,248,0.16) 0%, rgba(244,114,182,0.16) 100%);
+  --shadow-glow: 0 10px 30px -8px rgba(129, 140, 248, 0.5);
+  --header-bg: rgba(12, 12, 18, 0.82);
+  --header-border: rgba(255, 255, 255, 0.1);
 }
 
