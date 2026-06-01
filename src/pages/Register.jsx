@@ -1,218 +1,159 @@
-
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Loader2, Eye, EyeOff, Check, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { ShowcasePanel, AuthStyles, GoogleIcon } from './Login';
+
+const getStrength = (pw) => {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return score; // 0-4
+};
+const strengthLabels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+const strengthColors = ['#ef4444', '#ef4444', '#f59e0b', '#3b82f6', '#10b981'];
 
 const Register = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register } = useAuth();
-    const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [agree, setAgree] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { register, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-        try {
-            await register(name, email, password);
-            navigate('/');
-        } catch (error) {
-            console.error("Registration failed", error);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+  const strength = useMemo(() => getStrength(password), [password]);
+  const passwordsMatch = confirm.length > 0 && password === confirm;
 
-    return (
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (password !== confirm) { setError('Passwords do not match.'); return; }
+    if (!agree) { setError('Please accept the Terms & Privacy Policy to continue.'); return; }
+
+    setIsSubmitting(true);
+    try {
+      await register(name, email, password);
+      navigate('/');
+    } catch (err) {
+      setError(err?.message || 'Registration failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch {
+      setError('Google sign-up is unavailable. Enable the Google provider in Supabase Auth.');
+      setGoogleLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-wrap">
+      <ShowcasePanel
+        eyebrow="Join ASTRA"
+        title="Create your account. Elevate your wardrobe."
+        subtitle="Become a member for early access to drops, exclusive pricing, and a faster checkout."
+        image="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=1200"
+      />
+
+      <div className="auth-form-panel">
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 'var(--spacing-xl)',
-                position: 'relative',
-                overflow: 'hidden',
-                backgroundColor: 'var(--color-background)'
-            }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="auth-card"
         >
-            {/* Background blobs */}
-            <div style={{
-                position: 'absolute',
-                top: '20%',
-                right: '25%',
-                width: '300px',
-                height: '300px',
-                backgroundColor: 'var(--color-accent)',
-                filter: 'blur(100px)',
-                opacity: 0.1,
-                borderRadius: '50%'
-            }} />
-            <div style={{
-                position: 'absolute',
-                bottom: '15%',
-                left: '20%',
-                width: '250px',
-                height: '250px',
-                backgroundColor: 'var(--color-primary)',
-                filter: 'blur(100px)',
-                opacity: 0.1,
-                borderRadius: '50%'
-            }} />
+          <Link to="/" className="auth-back"><ArrowLeft size={16} /> Back to store</Link>
 
-            <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ type: 'spring', damping: 20 }}
-                style={{
-                    width: '100%',
-                    maxWidth: '420px',
-                    backgroundColor: 'var(--color-surface)',
-                    padding: 'clamp(24px, 5vw, 40px)',
-                    borderRadius: '24px',
-                    boxShadow: 'var(--shadow-premium)',
-                    position: 'relative',
-                    border: '1px solid var(--color-border)',
-                    backdropFilter: 'blur(10px)'
-                }}
-            >
-                <div style={{ marginBottom: '32px' }}>
-                    <Link to="/" style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: 'var(--color-text-muted)',
-                        marginBottom: '24px',
-                        textDecoration: 'none',
-                        fontSize: '0.9rem',
-                        transition: 'color 0.2s',
-                        fontWeight: 500
-                    }}>
-                        <ArrowLeft size={16} /> Back to Home
-                    </Link>
-                    <h1 style={{
-                        fontFamily: 'var(--font-family-display)',
-                        fontSize: '2rem',
-                        marginBottom: '8px',
-                        background: 'linear-gradient(135deg, var(--color-text-main) 0%, var(--color-text-muted) 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>Create Account</h1>
-                    <p style={{ color: 'var(--color-text-muted)', lineHeight: 1.5 }}>Join ASTRA for exclusive access</p>
+          <div className="auth-logo">
+            <span className="auth-logo-badge">A</span>
+            <span className="auth-logo-text">ASTRA</span>
+          </div>
+
+          <h1 className="auth-title">Create account</h1>
+          <p className="auth-sub">Join thousands of members shopping with ASTRA.</p>
+
+          {error && <div className="auth-error">{error}</div>}
+
+          <button type="button" onClick={handleGoogle} disabled={googleLoading} className="google-btn">
+            {googleLoading ? <Loader2 size={20} className="animate-spin" /> : <GoogleIcon />}
+            Sign up with Google
+          </button>
+
+          <div className="auth-divider"><span>or register with email</span></div>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="auth-field">
+              <User size={19} className="auth-field-icon" />
+              <input type="text" placeholder="Full name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="auth-field">
+              <Mail size={19} className="auth-field-icon" />
+              <input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+            <div className="auth-field">
+              <Lock size={19} className="auth-field-icon" />
+              <input type={showPw ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" className="auth-eye" onClick={() => setShowPw((v) => !v)} aria-label="Toggle password">
+                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            {password.length > 0 && (
+              <div style={{ marginTop: '-4px' }}>
+                <div style={{ display: 'flex', gap: '5px', marginBottom: '6px' }}>
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} style={{ flex: 1, height: '4px', borderRadius: '2px', backgroundColor: i < strength ? strengthColors[strength] : 'var(--color-border)', transition: 'background-color .3s' }} />
+                  ))}
                 </div>
+                <span style={{ fontSize: '0.78rem', color: strengthColors[strength], fontWeight: 600 }}>{strengthLabels[strength]}</span>
+              </div>
+            )}
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ position: 'relative' }}>
-                        <User size={20} color="var(--color-text-muted)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                        <input
-                            type="text"
-                            placeholder="Full Name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '14px 14px 14px 48px',
-                                borderRadius: '12px',
-                                border: '1px solid var(--color-border)',
-                                backgroundColor: 'var(--color-background)',
-                                color: 'var(--color-text-main)',
-                                outline: 'none',
-                                fontFamily: 'inherit',
-                                fontSize: '1rem',
-                                transition: 'all 0.2s'
-                            }}
-                        />
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                        <Mail size={20} color="var(--color-text-muted)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                        <input
-                            type="email"
-                            placeholder="Email Address"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '14px 14px 14px 48px',
-                                borderRadius: '12px',
-                                border: '1px solid var(--color-border)',
-                                backgroundColor: 'var(--color-background)',
-                                color: 'var(--color-text-main)',
-                                outline: 'none',
-                                fontFamily: 'inherit',
-                                fontSize: '1rem',
-                                transition: 'all 0.2s'
-                            }}
-                        />
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                        <Lock size={20} color="var(--color-text-muted)" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '14px 14px 14px 48px',
-                                borderRadius: '12px',
-                                border: '1px solid var(--color-border)',
-                                backgroundColor: 'var(--color-background)',
-                                color: 'var(--color-text-main)',
-                                outline: 'none',
-                                fontFamily: 'inherit',
-                                fontSize: '1rem',
-                                transition: 'all 0.2s'
-                            }}
-                        />
-                    </div>
+            <div className="auth-field">
+              <Lock size={19} className="auth-field-icon" />
+              <input type={showPw ? 'text' : 'password'} placeholder="Confirm password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+              {confirm.length > 0 && (
+                <span className="auth-eye" style={{ color: passwordsMatch ? 'var(--color-success)' : 'var(--color-error)', pointerEvents: 'none' }}>
+                  {passwordsMatch ? <Check size={18} /> : <X size={18} />}
+                </span>
+              )}
+            </div>
 
-                    <button
-                        disabled={isSubmitting}
-                        style={{
-                            width: '100%',
-                            padding: '14px',
-                            backgroundColor: 'var(--color-accent)',
-                            color: '#ffffff',
-                            borderRadius: '12px',
-                            fontWeight: 600,
-                            cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                            border: 'none',
-                            fontSize: '1rem',
-                            marginTop: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            opacity: isSubmitting ? 0.7 : 1,
-                            transition: 'opacity 0.2s'
-                        }}
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 size={20} className="animate-spin" />
-                                Creating Account...
-                            </>
-                        ) : (
-                            'Create Account'
-                        )}
-                    </button>
-                </form>
+            <label className="auth-check" style={{ alignItems: 'flex-start', lineHeight: 1.5 }}>
+              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: '2px' }} />
+              <span>I agree to ASTRA's <a href="#" className="auth-link">Terms of Service</a> and <a href="#" className="auth-link">Privacy Policy</a>.</span>
+            </label>
 
-                <p style={{ textAlign: 'center', marginTop: '32px', color: 'var(--color-text-muted)' }}>
-                    Already have an account? <Link to="/login" style={{ color: 'var(--color-accent)', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link>
-                </p>
-            </motion.div>
+            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }} disabled={isSubmitting} className="auth-submit">
+              {isSubmitting ? <><Loader2 size={20} className="animate-spin" /> Creating account...</> : 'Create Account'}
+            </motion.button>
+          </form>
+
+          <p className="auth-foot">
+            Already have an account? <Link to="/login" className="auth-link strong">Sign in</Link>
+          </p>
         </motion.div>
-    );
+      </div>
+
+      <AuthStyles />
+    </div>
+  );
 };
 
 export default Register;
