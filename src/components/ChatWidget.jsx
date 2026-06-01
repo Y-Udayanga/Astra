@@ -56,17 +56,24 @@ const ChatWidget = () => {
                             {/* Header */}
                             <div style={{
                                 padding: 'var(--spacing-md)',
-                                backgroundColor: 'var(--color-primary)',
+                                background: 'var(--gradient-brand)',
                                 color: 'white',
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center'
                             }}>
-                                <div>
-                                    <h4 style={{ margin: 0 }}>Support</h4>
-                                    <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>We reply immediately</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <MessageCircle size={18} />
+                                    </span>
+                                    <div>
+                                        <h4 style={{ margin: 0 }}>ASTRA Support</h4>
+                                        <span style={{ fontSize: '0.78rem', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#4ade80', display: 'inline-block' }} /> Online now
+                                        </span>
+                                    </div>
                                 </div>
-                                <button onClick={toggleChat} style={{ color: 'white' }}><X size={20} /></button>
+                                <button onClick={toggleChat} style={{ color: 'white', background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
                             </div>
 
                             {/* Messages */}
