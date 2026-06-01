@@ -135,11 +135,46 @@ export const AuthProvider = ({ children }) => {
         setCurrentUser(null);
     };
 
+    const updateProfile = async ({ name, avatar }) => {
+        if (!currentUser) {
+            throw new Error('You must be signed in to update your profile.');
+        }
+
+        const profileUpdates = {};
+        if (name !== undefined) profileUpdates.name = name;
+        if (avatar !== undefined) profileUpdates.avatar_url = avatar;
+
+        const { error } = await supabase
+            .from('profiles')
+            .update(profileUpdates)
+            .eq('id', currentUser.id);
+
+        if (error) {
+            throw new Error(error.message);
+        }
+
+        // Keep auth user metadata in sync (best-effort).
+        if (name !== undefined) {
+            await supabase.auth.updateUser({ data: { name } }).catch((err) => {
+                console.error('Failed to sync auth metadata', err);
+            });
+        }
+
+        const updated = {
+            ...currentUser,
+            name: name ?? currentUser.name,
+            avatar: avatar ?? currentUser.avatar,
+        };
+        setCurrentUser(updated);
+        return updated;
+    };
+
     const value = {
         currentUser,
         login,
         register,
         logout,
+        updateProfile,
         loading
     };
 

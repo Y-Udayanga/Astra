@@ -27,6 +27,13 @@ export const CartProvider = ({ children }) => {
         setCartItems(prev => prev.filter(item => item.id !== id));
     };
 
+    const updateQuantity = (id, delta) => {
+        setCartItems(prev => prev
+            .map(item => item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item));
+    };
+
+    const clearCart = () => setCartItems([]);
+
     const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     const cartTotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
@@ -35,6 +42,8 @@ export const CartProvider = ({ children }) => {
             cartItems,
             addToCart,
             removeFromCart,
+            updateQuantity,
+            clearCart,
             cartCount,
             cartTotal,
             isCartOpen,
