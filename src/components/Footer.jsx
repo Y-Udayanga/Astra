@@ -17,7 +17,12 @@ const Footer = () => {
             }}>
                 {/* Brand */}
                 <div>
-                    <h3 style={{ fontFamily: 'var(--font-family-display)', fontSize: '1.5rem', marginBottom: 'var(--spacing-md)' }}>ANTIGRAVITY</h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 'var(--spacing-md)' }}>
+                        <span style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
+                            <span style={{ color: '#fff', fontWeight: 800, fontFamily: 'var(--font-family-display)' }}>A</span>
+                        </span>
+                        <h3 style={{ fontFamily: 'var(--font-family-display)', fontSize: '1.5rem', margin: 0, color: 'var(--color-text-main)' }}>ASTRA</h3>
+                    </div>
                     <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-lg)', lineHeight: '1.6' }}>
                         Premium e-commerce experience. Redefining online shopping with style and speed.
                     </p>
@@ -95,7 +100,7 @@ const Footer = () => {
                 color: 'var(--color-text-muted)',
                 fontSize: '0.875rem'
             }}>
-                © {new Date().getFullYear()} Antigravity Layouts. All rights reserved.
+                © {new Date().getFullYear()} ASTRA. All rights reserved.
             </div>
         </footer>
     );
