@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard,
     Package,
@@ -11,7 +11,10 @@ import {
     Menu,
     X,
     Bell,
-    Search
+    Search,
+    Store,
+    UserCircle,
+    ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,9 +22,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 const AdminLayout = () => {
     const { currentUser, logout } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const profileRef = useRef(null);
 
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
+    };
 
     const menuItems = [
         { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -70,10 +89,12 @@ const AdminLayout = () => {
                 }}
             >
                 <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--color-accent), #ec4899)', borderRadius: '8px' }}></div>
+                    <Link to="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'var(--color-text-main)' }}>
+                        <div style={{ width: '34px', height: '34px', background: 'var(--gradient-brand)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
+                            <span style={{ color: '#fff', fontWeight: 800, fontFamily: 'var(--font-family-display)' }}>A</span>
+                        </div>
                         <span style={{ fontWeight: 'bold', fontSize: '1.2rem', fontFamily: 'var(--font-family-display)' }}>ASTRA Admin</span>
-                    </div>
+                    </Link>
                     <button
                         type="button"
                         className="admin-sidebar-close-btn"
@@ -101,7 +122,7 @@ const AdminLayout = () => {
                                             borderRadius: '8px',
                                             textDecoration: 'none',
                                             color: isActive ? 'var(--color-accent)' : 'var(--color-text-muted)',
-                                            backgroundColor: isActive ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                                            backgroundColor: isActive ? 'var(--color-accent-soft)' : 'transparent',
                                             fontWeight: isActive ? 600 : 500,
                                             transition: 'all 0.2s'
                                         }}
@@ -115,10 +136,22 @@ const AdminLayout = () => {
                     </ul>
                 </nav>
 
-                <div style={{ padding: '24px', borderTop: '1px solid var(--color-border)' }}>
+                <div style={{ padding: '16px 12px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Link
+                        to="/"
+                        style={{
+                            width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
+                            padding: '12px 16px', borderRadius: '8px', background: 'none',
+                            border: '1px solid var(--color-border)', color: 'var(--color-text-main)',
+                            cursor: 'pointer', transition: 'all 0.2s', textDecoration: 'none', fontWeight: 500,
+                        }}
+                    >
+                        <Store size={20} />
+                        View Store
+                    </Link>
                     <button
                         type="button"
-                        onClick={logout}
+                        onClick={handleLogout}
                         style={{
                             width: '100%',
                             display: 'flex',
@@ -130,7 +163,8 @@ const AdminLayout = () => {
                             border: '1px solid var(--color-border)',
                             color: 'var(--color-error)',
                             cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            fontWeight: 500,
                         }}
                     >
                         <LogOut size={20} />
@@ -190,22 +224,48 @@ const AdminLayout = () => {
                             <Bell size={20} color="var(--color-text-muted)" />
                             <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', backgroundColor: 'var(--color-error)', borderRadius: '50%' }}></span>
                         </button>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div className="admin-user-info" style={{ textAlign: 'right' }}>
-                                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser?.name || "Admin"}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Administrator</div>
-                            </div>
-                            <img
-                                src={currentUser?.avatar || "https://ui-avatars.com/api/?name=Admin+User"}
-                                alt="Profile"
+                        <div ref={profileRef} style={{ position: 'relative' }}>
+                            <button
+                                type="button"
+                                onClick={() => setProfileOpen((v) => !v)}
                                 style={{
-                                    width: '36px',
-                                    height: '36px',
-                                    borderRadius: '50%',
-                                    objectFit: 'cover',
-                                    border: '2px solid var(--color-border)'
+                                    display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                                    background: 'none', border: 'none', padding: '4px 6px', borderRadius: 'var(--radius-full)',
                                 }}
-                            />
+                            >
+                                <div className="admin-user-info" style={{ textAlign: 'right' }}>
+                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{currentUser?.name || "Admin"}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Administrator</div>
+                                </div>
+                                <img
+                                    src={currentUser?.avatar || "https://ui-avatars.com/api/?name=Admin+User"}
+                                    alt="Profile"
+                                    style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-accent)' }}
+                                />
+                                <ChevronDown size={16} color="var(--color-text-muted)" style={{ transform: profileOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+                            </button>
+
+                            <AnimatePresence>
+                                {profileOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                                        transition={{ duration: 0.15 }}
+                                        style={{
+                                            position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: '220px',
+                                            backgroundColor: 'var(--color-elevated)', borderRadius: '14px',
+                                            border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)', overflow: 'hidden', zIndex: 50, padding: '6px',
+                                        }}
+                                    >
+                                        <AdminMenuItem icon={<UserCircle size={18} />} label="My Profile" onClick={() => { setProfileOpen(false); navigate('/profile'); }} />
+                                        <AdminMenuItem icon={<Store size={18} />} label="View Store" onClick={() => { setProfileOpen(false); navigate('/'); }} />
+                                        <AdminMenuItem icon={<Settings size={18} />} label="Settings" onClick={() => { setProfileOpen(false); navigate('/admin/settings'); }} />
+                                        <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '6px 4px' }} />
+                                        <AdminMenuItem icon={<LogOut size={18} />} label="Logout" danger onClick={handleLogout} />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </header>
@@ -217,5 +277,23 @@ const AdminLayout = () => {
         </div>
     );
 };
+
+const AdminMenuItem = ({ icon, label, onClick, danger }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '10px 12px', borderRadius: '9px', border: 'none', background: 'transparent',
+            cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500,
+            color: danger ? 'var(--color-error)' : 'var(--color-text-main)',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = danger ? 'rgba(239,68,68,0.1)' : 'var(--color-surface-2)')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+    >
+        {icon}
+        {label}
+    </button>
+);
 
 export default AdminLayout;
