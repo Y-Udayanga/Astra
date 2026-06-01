@@ -30,8 +30,15 @@ const Login = () => {
     try {
       const user = await login(email, password);
       navigate(user.role === 'admin' ? '/admin/dashboard' : '/');
-    } catch {
-      setError('Failed to sign in. Please check your credentials.');
+    } catch (err) {
+      const msg = (err?.message || '').toLowerCase();
+      if (msg.includes('email not confirmed')) {
+        setError('Your email is not confirmed yet. Check your inbox for the confirmation link, or ask the store admin to disable email confirmation in Supabase.');
+      } else if (msg.includes('invalid login')) {
+        setError('Incorrect email or password. If you just registered, make sure your account exists and is confirmed.');
+      } else {
+        setError(err?.message || 'Failed to sign in. Please check your credentials.');
+      }
     } finally {
       setIsSubmitting(false);
     }

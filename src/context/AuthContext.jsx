@@ -120,15 +120,19 @@ export const AuthProvider = ({ children }) => {
         });
         if (error) throw error;
 
-        if (data.user) {
+        // When "Confirm email" is enabled in Supabase, signUp returns a user
+        // but NO session until the email is verified. Only treat the user as
+        // logged-in when an active session exists.
+        if (data.session && data.user) {
             const userObj = await loadUserProfile({
                 ...data.user,
                 user_metadata: { ...data.user.user_metadata, name },
             });
             setCurrentUser(userObj);
-            return userObj;
+            return { user: userObj, needsConfirmation: false };
         }
-        return null;
+
+        return { user: null, needsConfirmation: true };
     };
 
     const signInWithGoogle = async () => {

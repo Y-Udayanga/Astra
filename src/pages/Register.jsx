@@ -24,6 +24,7 @@ const Register = () => {
   const [showPw, setShowPw] = useState(false);
   const [agree, setAgree] = useState(false);
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { register, signInWithGoogle } = useAuth();
@@ -35,6 +36,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setInfo('');
 
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
@@ -42,8 +44,12 @@ const Register = () => {
 
     setIsSubmitting(true);
     try {
-      await register(name, email, password);
-      navigate('/');
+      const result = await register(name, email, password);
+      if (result?.needsConfirmation) {
+        setInfo('Account created! Please check your email to confirm your account, then sign in.');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err?.message || 'Registration failed. Please try again.');
     } finally {
@@ -89,6 +95,11 @@ const Register = () => {
           <p className="auth-sub">Join thousands of members shopping with ASTRA.</p>
 
           {error && <div className="auth-error">{error}</div>}
+          {info && (
+            <div style={{ background: 'rgba(16,185,129,0.1)', color: 'var(--color-success)', padding: '12px 14px', borderRadius: '10px', marginBottom: '18px', fontSize: '0.88rem', border: '1px solid rgba(16,185,129,0.25)' }}>
+              {info} <Link to="/login" className="auth-link strong">Go to sign in</Link>
+            </div>
+          )}
 
           <button type="button" onClick={handleGoogle} disabled={googleLoading} className="google-btn">
             {googleLoading ? <Loader2 size={20} className="animate-spin" /> : <GoogleIcon />}
