@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
+import { SITE_URL } from '../config';
 
 const AuthContext = createContext();
 
@@ -134,7 +135,7 @@ export const AuthProvider = ({ children }) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin,
+                redirectTo: SITE_URL,
                 queryParams: { access_type: 'offline', prompt: 'consent' },
             },
         });
