@@ -20,6 +20,7 @@ import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Sell from './pages/Sell';
+import Profile from './pages/Profile';
 
 // Admin Pages
 import Dashboard from './pages/admin/Dashboard';
@@ -63,6 +64,11 @@ const AnimatedRoutes = () => {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/sell" element={<Sell />} />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
         </Route>
 
         {/* Auth Routes (No Layout) */}
