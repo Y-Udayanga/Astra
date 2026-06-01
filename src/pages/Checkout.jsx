@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard, ShieldCheck, Lock, AlertTriangle } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 import { createOrder } from '../services/api';
+import { SITE_URL } from '../config';
 
 // PayHere sandbox processes payments in LKR.
 const PAY_CURRENCY = 'LKR';
@@ -92,7 +93,7 @@ const Checkout = () => {
         const hashedSecret = CryptoJS.MD5(merchantSecret).toString().toUpperCase();
         const hash = CryptoJS.MD5(merchantId + orderId + amount + PAY_CURRENCY + hashedSecret).toString().toUpperCase();
 
-        const origin = window.location.origin;
+        const origin = SITE_URL;
         const payment = {
             sandbox: true,
             merchant_id: merchantId,
