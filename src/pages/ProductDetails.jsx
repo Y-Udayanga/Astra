@@ -3,10 +3,12 @@ import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Star, ArrowLeft, Truck, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const ProductDetails = () => {
     const { id } = useParams();
     const { addToCart } = useCart();
+    const { format } = useCurrency();
     const [selectedSize, setSelectedSize] = useState('M');
     const [activeTab, setActiveTab] = useState('description');
 
@@ -92,7 +94,7 @@ const ProductDetails = () => {
                     </div>
 
                     <p style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 700, marginBottom: 'var(--spacing-xl)', color: 'var(--color-text-main)' }}>
-                        ${product.price}
+                        {format(product.price)}
                     </p>
 
                     <div style={{ marginBottom: 'var(--spacing-xl)' }}>

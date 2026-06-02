@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Plus, Star, Truck, ShieldCheck, RefreshCw, Headphones, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { getProducts } from '../services/api';
 
 const fallbackProducts = [
@@ -14,6 +15,7 @@ const fallbackProducts = [
 
 const Home = () => {
   const { addToCart } = useCart();
+  const { format } = useCurrency();
   const [products, setProducts] = useState(fallbackProducts);
 
   useEffect(() => {
@@ -182,7 +184,7 @@ const Home = () => {
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '4px', color: 'var(--color-text-main)', fontWeight: 600 }}>{item.name}</h3>
                   </Link>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 'var(--spacing-md)' }}>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)' }}>${Number(item.price).toFixed(2)}</span>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-main)' }}>{format(item.price)}</span>
                     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => addToCart(item)} aria-label="Add to cart"
                       style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--gradient-brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: 'var(--shadow-glow)' }}>
                       <Plus size={20} />
