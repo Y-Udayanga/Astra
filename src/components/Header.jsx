@@ -57,7 +57,7 @@ const Header = () => {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--header-border)',
-        padding: '0.85rem var(--spacing-xl)',
+        padding: '0.85rem clamp(0.9rem, 4vw, 2rem)',
         transition: 'background-color 0.3s ease, border-color 0.3s ease',
         boxShadow: isDark ? '0 4px 30px rgba(0, 0, 0, 0.4)' : '0 4px 24px rgba(0, 0, 0, 0.04)',
       }}
@@ -101,7 +101,7 @@ const Header = () => {
         </nav>
 
         {/* Right-side actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.15rem, 1.2vw, 0.5rem)', flexShrink: 0 }}>
           <IconButton onClick={toggleTheme} label="Toggle theme">
             {isDark ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
@@ -305,15 +305,19 @@ const Header = () => {
         }
         .header-icon-btn:hover { background-color: var(--color-surface-2); color: var(--color-accent); }
         .nav-link:hover { color: var(--color-accent) !important; background-color: var(--color-accent-soft) !important; }
-        @media (min-width: 880px) {
+        @media (min-width: 960px) {
           .desktop-nav { display: flex !important; }
           .signin-btn { display: inline-flex !important; }
           .mobile-menu-btn { display: none !important; }
         }
-        @media (max-width: 879px) {
+        @media (max-width: 959px) {
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: block !important; }
           .profile-wrap { display: none !important; }
+          .signin-btn { display: none !important; }
+        }
+        @media (max-width: 420px) {
+          .header-icon-btn { width: 36px; height: 36px; }
         }
       `}</style>
     </header>
