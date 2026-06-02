@@ -77,10 +77,9 @@ const Login = () => {
             <ArrowLeft size={16} /> Back to store
           </Link>
 
-          <div className="auth-logo">
-            <span className="auth-logo-badge">A</span>
-            <span className="auth-logo-text">ASTRA</span>
-          </div>
+          <Link to="/" className="auth-logo">
+            <img src="/astra-logo.png" alt="ASTRA" className="auth-logo-img" />
+          </Link>
 
           <h1 className="auth-title">Sign in</h1>
           <p className="auth-sub">Welcome back — please enter your details.</p>
@@ -178,10 +177,15 @@ export const AuthStyles = () => (
     .auth-showcase { display: none; position: relative; overflow: hidden; }
     .auth-form-panel {
       display: flex; align-items: center; justify-content: center;
-      padding: clamp(20px, 5vw, 48px); position: relative; overflow: hidden;
+      padding: clamp(28px, 5vw, 48px); position: relative;
+      min-height: 100vh; min-height: 100dvh;
     }
     .auth-card {
       width: 100%; max-width: 440px; position: relative; z-index: 2;
+      margin: auto;
+    }
+    .auth-logo-img {
+      height: 38px; width: auto; display: block; border-radius: 8px;
     }
     .auth-back {
       display: inline-flex; align-items: center; gap: 7px; color: var(--color-text-muted);
