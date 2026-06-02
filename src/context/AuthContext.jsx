@@ -195,13 +195,28 @@ export const AuthProvider = ({ children }) => {
         if (country !== undefined) profileUpdates.country = country;
         if (bio !== undefined) profileUpdates.bio = bio;
 
-        const { error } = await supabase
+        // Update, then verify a row was actually written. If the profiles row
+        // is missing (e.g. the account existed before the profiles table was
+        // provisioned / re-created), the UPDATE matches 0 rows and silently
+        // "succeeds" — which is why a saved photo could vanish on reload. In
+        // that case we insert the row so the change truly persists.
+        const { data: updatedRows, error } = await supabase
             .from('profiles')
             .update(profileUpdates)
-            .eq('id', currentUser.id);
+            .eq('id', currentUser.id)
+            .select('id');
 
         if (error) {
             throw new Error(error.message);
+        }
+
+        if (!updatedRows || updatedRows.length === 0) {
+            const { error: insertError } = await supabase
+                .from('profiles')
+                .insert({ id: currentUser.id, email: currentUser.email, ...profileUpdates });
+            if (insertError) {
+                throw new Error(insertError.message);
+            }
         }
 
         // Keep auth user metadata in sync (best-effort).

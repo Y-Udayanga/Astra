@@ -14,24 +14,51 @@ import {
     Search,
     Store,
     UserCircle,
-    ChevronDown
+    ChevronDown,
+    Sun,
+    Moon,
+    CheckCheck,
+    Tag,
+    UserPlus,
+    PackageCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const NOTIF_ICONS = {
+    order: PackageCheck,
+    product: Tag,
+    customer: UserPlus,
+};
+
+const INITIAL_NOTIFICATIONS = [
+    { id: 'n1', type: 'order', title: 'New order received', body: 'A customer just placed a new order. Review it in Orders.', time: 'Just now', to: '/admin/orders', read: false },
+    { id: 'n2', type: 'customer', title: 'New customer signed up', body: 'A new account was created in your store.', time: '2 hours ago', to: '/admin/customers', read: false },
+    { id: 'n3', type: 'product', title: 'Low stock alert', body: 'Some products are running low. Check your catalog.', time: 'Yesterday', to: '/admin/products', read: true },
+];
 
 const AdminLayout = () => {
     const { currentUser, logout } = useAuth();
+    const { isDark, toggleTheme } = useTheme();
     const location = useLocation();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
     const profileRef = useRef(null);
+    const notifRef = useRef(null);
+
+    const unreadCount = notifications.filter((n) => !n.read).length;
+    const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
     useEffect(() => {
         const handler = (e) => {
             if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+            if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
@@ -213,15 +240,100 @@ const AdminLayout = () => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px, 1.5vw, 18px)' }}>
                         <button
                             type="button"
-                            onClick={() => window.alert('No new notifications.')}
-                            style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer' }}
+                            onClick={toggleTheme}
+                            aria-label="Toggle theme"
+                            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                            className="admin-icon-btn"
                         >
-                            <Bell size={20} color="var(--color-text-muted)" />
-                            <span style={{ position: 'absolute', top: -2, right: -2, width: '8px', height: '8px', backgroundColor: 'var(--color-error)', borderRadius: '50%' }}></span>
+                            {isDark ? <Sun size={20} color="var(--color-text-muted)" /> : <Moon size={20} color="var(--color-text-muted)" />}
                         </button>
+
+                        <div ref={notifRef} style={{ position: 'relative' }}>
+                            <button
+                                type="button"
+                                onClick={() => setNotifOpen((v) => !v)}
+                                aria-label="Notifications"
+                                className="admin-icon-btn"
+                                style={{ position: 'relative' }}
+                            >
+                                <Bell size={20} color="var(--color-text-muted)" />
+                                {unreadCount > 0 && (
+                                    <span style={{ position: 'absolute', top: 2, right: 2, minWidth: '16px', height: '16px', padding: '0 4px', fontSize: '0.62rem', fontWeight: 700, color: '#fff', backgroundColor: 'var(--color-error)', borderRadius: 'var(--radius-full)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--color-surface)' }}>{unreadCount}</span>
+                                )}
+                            </button>
+
+                            <AnimatePresence>
+                                {notifOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                                        transition={{ duration: 0.15 }}
+                                        className="admin-notif-panel"
+                                        style={{
+                                            position: 'absolute', top: 'calc(100% + 10px)', right: 0,
+                                            width: 'min(340px, calc(100vw - 24px))', maxHeight: '420px', display: 'flex', flexDirection: 'column',
+                                            backgroundColor: 'var(--color-elevated)', borderRadius: '16px',
+                                            border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)', overflow: 'hidden', zIndex: 50,
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid var(--color-border)' }}>
+                                            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Notifications</div>
+                                            {unreadCount > 0 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={markAllRead}
+                                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-accent)', fontSize: '0.8rem', fontWeight: 600 }}
+                                                >
+                                                    <CheckCheck size={15} /> Mark all read
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div style={{ overflowY: 'auto', flex: 1 }}>
+                                            {notifications.length === 0 ? (
+                                                <div style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                                                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--color-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                                                        <Bell size={22} color="var(--color-text-subtle)" />
+                                                    </div>
+                                                    <div style={{ fontWeight: 600, color: 'var(--color-text-main)', marginBottom: '4px' }}>You're all caught up</div>
+                                                    <div style={{ fontSize: '0.82rem' }}>No new notifications right now.</div>
+                                                </div>
+                                            ) : (
+                                                notifications.map((n) => {
+                                                    const NIcon = NOTIF_ICONS[n.type] || Bell;
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            key={n.id}
+                                                            onClick={() => { setNotifOpen(false); if (n.to) navigate(n.to); }}
+                                                            style={{
+                                                                width: '100%', display: 'flex', gap: '12px', alignItems: 'flex-start', textAlign: 'left',
+                                                                padding: '13px 16px', border: 'none', borderBottom: '1px solid var(--color-border)',
+                                                                background: n.read ? 'transparent' : 'var(--color-accent-soft)', cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            <span style={{ width: '34px', height: '34px', flexShrink: 0, borderRadius: '10px', background: 'var(--gradient-brand-soft)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <NIcon size={17} />
+                                                            </span>
+                                                            <span style={{ minWidth: 0 }}>
+                                                                <span style={{ display: 'block', fontWeight: 600, fontSize: '0.88rem', color: 'var(--color-text-main)' }}>{n.title}</span>
+                                                                <span style={{ display: 'block', fontSize: '0.82rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>{n.body}</span>
+                                                                <span style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-text-subtle)', marginTop: '3px' }}>{n.time}</span>
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
                         <div ref={profileRef} style={{ position: 'relative' }}>
                             <button
                                 type="button"

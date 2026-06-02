@@ -247,8 +247,21 @@ export const saveStoreSettings = async (settings) => {
         ? supabase.from('store_settings').update(payload).eq('id', existing.id)
         : supabase.from('store_settings').insert(payload);
 
-    const { data, error } = await request.select('*').single();
+    // Use maybeSingle() instead of single(): when a row-level-security policy
+    // blocks the write, the statement affects 0 rows and single() throws the
+    // cryptic "Cannot coerce the result to a single JSON object". maybeSingle()
+    // returns null so we can surface a clear, actionable message instead.
+    const { data, error } = await request.select('*').maybeSingle();
     throwIfError(error, 'Failed to save store settings');
+
+    if (!data) {
+        throw new Error(
+            'Failed to save store settings: the update was blocked by the database. ' +
+            'Your account needs the admin role — re-run schema.sql (it now backfills ' +
+            'the admin profile) and try again.'
+        );
+    }
+
     return mapSettings(data);
 };
 
