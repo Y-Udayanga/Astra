@@ -195,17 +195,20 @@ const ProductFormModal = ({ product, onClose, onSave }) => {
     };
 
     return (
-        <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}
-                style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)', zIndex: 200 }} />
+        <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(12px, 3vw, 24px)' }}
+        >
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', stiffness: 280, damping: 26 }}
-                style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(620px, calc(100vw - 32px))', maxHeight: 'calc(100vh - 48px)', overflowY: 'auto', backgroundColor: 'var(--color-elevated)', borderRadius: '20px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)', zIndex: 201 }}>
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 'min(620px, 100%)', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', backgroundColor: 'var(--color-elevated)', borderRadius: '20px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--color-border)', position: 'sticky', top: 0, backgroundColor: 'var(--color-elevated)', zIndex: 2 }}>
                     <h2 style={{ fontSize: '1.3rem', margin: 0 }}>{product ? 'Edit Product' : 'Add New Product'}</h2>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px' }}><X size={22} /></button>
                 </div>
 
-                <form onSubmit={submit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                <form onSubmit={submit} style={{ padding: 'clamp(16px, 3vw, 24px)', display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     {/* Image preview */}
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                         <div style={{ width: '88px', height: '88px', borderRadius: '14px', backgroundColor: 'var(--color-surface-2)', backgroundImage: form.image ? `url(${form.image})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid var(--color-border)' }}>
@@ -254,7 +257,7 @@ const ProductFormModal = ({ product, onClose, onSave }) => {
 
                     {error && <div style={{ color: 'var(--color-error)', fontSize: '0.88rem' }}>{error}</div>}
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
                         <button type="button" onClick={onClose} style={{ padding: '11px 22px', borderRadius: '10px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-main)', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
                         <button type="submit" disabled={saving} style={{ padding: '11px 26px', borderRadius: '10px', border: 'none', background: 'var(--gradient-brand)', color: '#fff', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: 'var(--shadow-glow)' }}>
                             {saving ? <><Loader2 size={18} className="animate-spin" /> Saving...</> : <><Save size={18} /> {product ? 'Save Changes' : 'Create Product'}</>}
@@ -262,29 +265,29 @@ const ProductFormModal = ({ product, onClose, onSave }) => {
                     </div>
                 </form>
             </motion.div>
-        </>
+        </motion.div>
     );
 };
 
 const ConfirmModal = ({ product, deleting, onCancel, onConfirm }) => (
-    <>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onCancel}
-            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)', zIndex: 200 }} />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onCancel}
+        style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(12px, 3vw, 24px)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-            style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(420px, calc(100vw - 32px))', backgroundColor: 'var(--color-elevated)', borderRadius: '18px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)', zIndex: 201, padding: '28px', textAlign: 'center' }}>
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 'min(420px, 100%)', backgroundColor: 'var(--color-elevated)', borderRadius: '18px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)', padding: 'clamp(20px, 4vw, 28px)', textAlign: 'center' }}>
             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(239,68,68,0.12)', color: 'var(--color-error)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <AlertTriangle size={28} />
             </div>
             <h3 style={{ marginBottom: '8px' }}>Delete product?</h3>
             <p style={{ color: 'var(--color-text-muted)', marginBottom: '24px' }}>Are you sure you want to delete <strong>{product.name}</strong>? This action cannot be undone.</p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button onClick={onCancel} style={{ padding: '11px 22px', borderRadius: '10px', border: '1px solid var(--color-border)', background: 'transparent', color: 'var(--color-text-main)', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
                 <button onClick={onConfirm} disabled={deleting} style={{ padding: '11px 22px', borderRadius: '10px', border: 'none', background: 'var(--color-error)', color: '#fff', fontWeight: 600, cursor: deleting ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                     {deleting ? <><Loader2 size={18} className="animate-spin" /> Deleting...</> : <><Trash2 size={18} /> Delete</>}
                 </button>
             </div>
         </motion.div>
-    </>
+    </motion.div>
 );
 
 const iconBtn = { padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', borderRadius: '8px', display: 'flex' };
