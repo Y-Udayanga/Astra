@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Save } from 'lucide-react';
+import { Save, Loader2, Check } from 'lucide-react';
 import { getStoreSettings, saveStoreSettings } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const Settings = () => {
+    const toast = useToast();
+    const { setCurrency } = useCurrency();
     const [form, setForm] = useState({
         storeName: 'ASTRA Store',
         supportEmail: 'support@astra.com',
         currency: 'USD',
     });
-    const [message, setMessage] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -40,13 +45,19 @@ const Settings = () => {
     };
 
     const handleSave = async () => {
+        setSaving(true);
         try {
-            const saved = await saveStoreSettings(form);
+            const result = await saveStoreSettings(form);
             setError('');
-            setMessage(`Saved ${saved.storeName}`);
-        } catch (error) {
-            setMessage('');
-            setError(error.message);
+            setCurrency(result.currency); // update currency symbol live across the app
+            setSaved(true);
+            toast.success(`Settings saved — currency is now ${result.currency}.`);
+            setTimeout(() => setSaved(false), 2500);
+        } catch (err) {
+            toast.error(err.message || 'Failed to save settings.');
+            setError(err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -88,9 +99,6 @@ const Settings = () => {
                     </div>
                 </div>
 
-                {message && (
-                    <div style={{ marginBottom: '16px', color: 'var(--color-accent)', fontWeight: 500 }}>{message}</div>
-                )}
                 {error && (
                     <div style={{ marginBottom: '16px', color: 'var(--color-error)', fontWeight: 500 }}>{error}</div>
                 )}
@@ -99,21 +107,23 @@ const Settings = () => {
                     <button
                         type="button"
                         onClick={handleSave}
+                        disabled={saving}
                         style={{
-                            backgroundColor: 'var(--color-accent)',
+                            background: saved ? 'var(--color-success)' : 'var(--gradient-brand)',
                             color: 'white',
                             border: 'none',
                             padding: '12px 32px',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             fontWeight: 600,
-                            cursor: 'pointer',
+                            cursor: saving ? 'not-allowed' : 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '8px'
+                            gap: '8px',
+                            boxShadow: 'var(--shadow-glow)',
+                            transition: 'background 0.2s'
                         }}
                     >
-                        <Save size={20} />
-                        Save Changes
+                        {saving ? <><Loader2 size={20} className="animate-spin" /> Saving...</> : saved ? <><Check size={20} /> Saved!</> : <><Save size={20} /> Save Changes</>}
                     </button>
                 </div>
             </div>
