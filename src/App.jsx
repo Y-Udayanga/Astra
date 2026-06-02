@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'r
 import { AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -95,13 +97,17 @@ const AnimatedRoutes = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <AnimatedRoutes />
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <CurrencyProvider>
+          <CartProvider>
+            <Router>
+              <AnimatedRoutes />
+            </Router>
+          </CartProvider>
+        </CurrencyProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
