@@ -121,6 +121,23 @@ input, textarea, select {
     font-family: inherit;
 }
 
+/* Admin top-bar icon buttons (theme toggle, notifications) */
+.admin-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.admin-icon-btn:hover {
+    background-color: var(--color-surface-2);
+}
+
 /* Responsive helper: admin sidebar */
 @media (min-width: 1025px) {
     .admin-sidebar-close-btn { display: none !important; }
