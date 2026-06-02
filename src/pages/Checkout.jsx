@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard, ShieldCheck, Lock, AlertTriangle } from 'lucide-react';
 import CryptoJS from 'crypto-js';
@@ -14,6 +15,7 @@ const PAY_CURRENCY = 'LKR';
 const Checkout = () => {
     const { cartItems, cartTotal, clearCart } = useCart();
     const { currentUser } = useAuth();
+    const { format } = useCurrency();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('card');
@@ -228,7 +230,7 @@ const Checkout = () => {
                                     <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
                                     <div style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>Qty {item.quantity}</div>
                                 </div>
-                                <span style={{ fontWeight: 600 }}>${(item.price * item.quantity).toFixed(2)}</span>
+                                <span style={{ fontWeight: 600 }}>{format(item.price * item.quantity)}</span>
                             </div>
                         ))}
                     </div>
@@ -236,7 +238,7 @@ const Checkout = () => {
                         <span>Shipping</span><span style={{ color: 'var(--color-success)', fontWeight: 600 }}>Free</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 800 }}>
-                        <span>Total</span><span>${Number(cartTotal).toFixed(2)}</span>
+                        <span>Total</span><span>{format(cartTotal)}</span>
                     </div>
 
                     <button type="submit" form="checkout-form" disabled={isProcessing} style={{
@@ -246,7 +248,7 @@ const Checkout = () => {
                         cursor: isProcessing ? 'not-allowed' : 'pointer', border: 'none', boxShadow: 'var(--shadow-glow)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     }}>
-                        {isProcessing ? 'Processing Payment...' : <><Lock size={17} /> Pay ${Number(cartTotal).toFixed(2)}</>}
+                        {isProcessing ? 'Processing Payment...' : <><Lock size={17} /> Pay {format(cartTotal)}</>}
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: 'var(--spacing-md)', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
