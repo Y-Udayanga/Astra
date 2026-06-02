@@ -368,6 +368,51 @@ create policy "avatars_owner_delete"
     using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
 -- =====================================================================
+-- BACKFILL PROFILES FROM EXISTING AUTH USERS  (critical, idempotent)
+-- ---------------------------------------------------------------------
+-- The "clean slate" section above DROPS and recreates `profiles`, but the
+-- on_auth_user_created trigger only fires for BRAND NEW signups. Every user
+-- who signed up earlier (INCLUDING the admin) would therefore be left with
+-- NO profile row after re-running this file. That single gap is what breaks:
+--   * the admin "Customers" page  -> it has no profiles to list,
+--   * Settings / Currency "Save"  -> is_admin() is false, so the UPDATE
+--       matches 0 rows and PostgREST throws
+--       "Cannot coerce the result to a single JSON object",
+--   * the profile photo "Save"    -> the UPDATE silently matches 0 rows.
+-- This statement re-mirrors every existing auth user into `profiles` and
+-- guarantees admin@astra.com keeps the admin role. Safe to run repeatedly.
+-- =====================================================================
+insert into public.profiles (id, name, email, role, avatar_url)
+select
+    u.id,
+    coalesce(
+        u.raw_user_meta_data->>'name',
+        u.raw_user_meta_data->>'full_name',
+        nullif(split_part(coalesce(u.email, ''), '@', 1), ''),
+        'User'
+    ) as name,
+    u.email,
+    case when u.email = 'admin@astra.com' then 'admin' else 'user' end as role,
+    coalesce(
+        u.raw_user_meta_data->>'avatar_url',
+        u.raw_user_meta_data->>'picture',
+        'https://ui-avatars.com/api/?name='
+            || replace(coalesce(u.raw_user_meta_data->>'name', split_part(coalesce(u.email, ''), '@', 1), 'User'), ' ', '+')
+            || '&background=6366f1&color=fff&bold=true'
+    ) as avatar_url
+from auth.users u
+on conflict (id) do update
+    set email = excluded.email,
+        name = coalesce(public.profiles.name, excluded.name),
+        avatar_url = coalesce(public.profiles.avatar_url, excluded.avatar_url),
+        -- Never silently downgrade an existing admin, and always (re)promote
+        -- the canonical admin account so the dashboard write policies work.
+        role = case
+            when excluded.email = 'admin@astra.com' then 'admin'
+            else public.profiles.role
+        end;
+
+-- =====================================================================
 -- OPTIONAL: promote an existing user to admin (run AFTER they sign up)
 --   update public.profiles set role = 'admin' where email = 'you@example.com';
 -- The user with email admin@astra.com is promoted automatically on signup.
