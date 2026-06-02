@@ -86,10 +86,9 @@ const Register = () => {
         >
           <Link to="/" className="auth-back"><ArrowLeft size={16} /> Back to store</Link>
 
-          <div className="auth-logo">
-            <span className="auth-logo-badge">A</span>
-            <span className="auth-logo-text">ASTRA</span>
-          </div>
+          <Link to="/" className="auth-logo">
+            <img src="/astra-logo.png" alt="ASTRA" className="auth-logo-img" />
+          </Link>
 
           <h1 className="auth-title">Create account</h1>
           <p className="auth-sub">Join thousands of members shopping with ASTRA.</p>
