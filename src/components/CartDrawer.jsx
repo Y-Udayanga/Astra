@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const CartDrawer = () => {
     const { isCartOpen, closeCart, cartItems, removeFromCart, cartTotal } = useCart();
+    const { format } = useCurrency();
 
     return (
         <AnimatePresence>
@@ -89,7 +91,7 @@ const CartDrawer = () => {
                                             <div style={{ flex: 1 }}>
                                                 <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{item.name}</h3>
                                                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>Qty: {item.quantity}</p>
-                                                <p style={{ fontWeight: 600, color: 'var(--color-primary)' }}>${item.price * item.quantity}</p>
+                                                <p style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{format(item.price * item.quantity)}</p>
                                             </div>
                                             <button
                                                 onClick={() => removeFromCart(item.id)}
@@ -108,7 +110,7 @@ const CartDrawer = () => {
                             <div style={{ padding: 'var(--spacing-lg)', borderTop: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-lg)', fontSize: '1.2rem', fontWeight: 700 }}>
                                     <span>Subtotal</span>
-                                    <span>${cartTotal}</span>
+                                    <span>{format(cartTotal)}</span>
                                 </div>
                                 <Link to="/checkout" onClick={closeCart} style={{ width: '100%' }}>
                                     <motion.button
