@@ -39,6 +39,11 @@ create table public.profiles (
     email text,
     role text default 'user' check (role in ('user', 'admin')),
     avatar_url text,
+    phone text,
+    address text,
+    city text,
+    country text,
+    bio text,
     created_at timestamptz default timezone('utc', now()) not null,
     updated_at timestamptz default timezone('utc', now()) not null
 );
@@ -320,6 +325,47 @@ values
 
 insert into public.store_settings (store_name, support_email, currency)
 values ('ASTRA Store', 'support@astra.com', 'USD');
+
+-- =====================================================================
+-- PROFILE EXTRA COLUMNS (idempotent — safe to run on an existing database
+-- without dropping anything). Adds optional phone/address/city/country/bio.
+-- =====================================================================
+alter table public.profiles
+    add column if not exists phone text,
+    add column if not exists address text,
+    add column if not exists city text,
+    add column if not exists country text,
+    add column if not exists bio text;
+
+-- =====================================================================
+-- AVATAR STORAGE (for profile picture uploads from the app)
+-- Creates a public "avatars" bucket and per-user upload policies.
+-- Uploaded files live under <user_id>/<filename> so users can only write
+-- to their own folder, while everyone can read (public avatars).
+-- =====================================================================
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "avatars_public_read" on storage.objects;
+create policy "avatars_public_read"
+    on storage.objects for select
+    using (bucket_id = 'avatars');
+
+drop policy if exists "avatars_owner_insert" on storage.objects;
+create policy "avatars_owner_insert"
+    on storage.objects for insert
+    with check (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
+
+drop policy if exists "avatars_owner_update" on storage.objects;
+create policy "avatars_owner_update"
+    on storage.objects for update
+    using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
+
+drop policy if exists "avatars_owner_delete" on storage.objects;
+create policy "avatars_owner_delete"
+    on storage.objects for delete
+    using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
 -- =====================================================================
 -- OPTIONAL: promote an existing user to admin (run AFTER they sign up)
