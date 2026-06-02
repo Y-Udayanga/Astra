@@ -6,8 +6,7 @@ import {
   ArrowUpRight, RefreshCw, Plus, AlertTriangle, Boxes
 } from 'lucide-react';
 import { getCustomers, getOrders, getProducts } from '../../services/api';
-
-const fmtCurrency = (n) => `$${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+import { useCurrency } from '../../context/CurrencyContext';
 
 const statusMeta = {
   completed: { label: 'Completed', color: '#10B981' },
@@ -19,6 +18,7 @@ const statusMeta = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { format: fmtCurrency } = useCurrency();
   const [data, setData] = useState({ products: [], orders: [], customers: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

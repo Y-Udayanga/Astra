@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Filter, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 const products = [
     { id: 1, name: "Premium Leather Jacket", price: 299, category: "Outerwear", image: "https://images.unsplash.com/photo-1551028919-6a014909a909?auto=format&fit=crop&q=80&w=500" },
@@ -17,6 +18,7 @@ const categories = ["All", "Outerwear", "Accessories", "Pants", "Footwear", "Top
 
 const Shop = () => {
     const { addToCart } = useCart();
+    const { format } = useCurrency();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [sortBy, setSortBy] = useState('featured');
@@ -241,7 +243,7 @@ const Shop = () => {
                                         <h3 style={{ fontSize: '1.1rem', marginBottom: 'var(--spacing-xs)', color: 'var(--color-text-main)', fontWeight: 600 }}>{product.name}</h3>
                                     </Link>
                                     <p style={{ color: 'var(--color-text-muted)', fontSize: '1rem', marginBottom: 'var(--spacing-md)' }}>
-                                        ${product.price}
+                                        {format(product.price)}
                                     </p>
                                     <button
                                         onClick={() => addToCart(product)}
