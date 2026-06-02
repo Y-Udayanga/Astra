@@ -64,26 +64,15 @@ const Header = () => {
     >
       <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
         {/* Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-          <motion.span
-            initial={{ rotate: -12, scale: 0.85 }}
-            animate={{ rotate: 0, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 12 }}
-            style={{
-              width: '34px', height: '34px', borderRadius: '11px',
-              background: 'var(--gradient-brand)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: 'var(--shadow-glow)',
-            }}
-          >
-            <span style={{ color: '#fff', fontWeight: 800, fontSize: '1.1rem', fontFamily: 'var(--font-family-display)' }}>A</span>
-          </motion.span>
-          <span style={{
-            fontFamily: 'var(--font-family-display)', fontSize: '1.6rem', fontWeight: 800,
-            letterSpacing: '-1px', color: 'var(--color-text-main)',
-          }}>
-            ASTRA
-          </span>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
+          <motion.img
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            src="/astra-logo.png"
+            alt="ASTRA"
+            style={{ height: '38px', width: 'auto', display: 'block', borderRadius: '8px' }}
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -239,7 +228,7 @@ const Header = () => {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2xl)' }}>
-              <span style={{ fontFamily: 'var(--font-family-display)', fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-main)' }}>ASTRA</span>
+              <img src="/astra-logo.png" alt="ASTRA" style={{ height: '34px', width: 'auto', display: 'block', borderRadius: '8px' }} />
               <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-main)' }}>
                 <X size={30} />
               </button>

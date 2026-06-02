@@ -17,12 +17,7 @@ const Footer = () => {
             }}>
                 {/* Brand */}
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: 'var(--spacing-md)' }}>
-                        <span style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--gradient-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
-                            <span style={{ color: '#fff', fontWeight: 800, fontFamily: 'var(--font-family-display)' }}>A</span>
-                        </span>
-                        <h3 style={{ fontFamily: 'var(--font-family-display)', fontSize: '1.5rem', margin: 0, color: 'var(--color-text-main)' }}>ASTRA</h3>
-                    </div>
+                    <img src="/astra-logo.png" alt="ASTRA" style={{ height: '40px', width: 'auto', display: 'block', borderRadius: '8px', marginBottom: 'var(--spacing-md)' }} />
                     <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-lg)', lineHeight: '1.6' }}>
                         Premium e-commerce experience. Redefining online shopping with style and speed.
                     </p>
