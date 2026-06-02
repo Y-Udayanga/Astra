@@ -90,10 +90,8 @@ const AdminLayout = () => {
             >
                 <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Link to="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'var(--color-text-main)' }}>
-                        <div style={{ width: '34px', height: '34px', background: 'var(--gradient-brand)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-glow)' }}>
-                            <span style={{ color: '#fff', fontWeight: 800, fontFamily: 'var(--font-family-display)' }}>A</span>
-                        </div>
-                        <span style={{ fontWeight: 'bold', fontSize: '1.2rem', fontFamily: 'var(--font-family-display)' }}>ASTRA Admin</span>
+                        <img src="/astra-logo.png" alt="ASTRA" style={{ height: '30px', width: 'auto', display: 'block', borderRadius: '7px' }} />
+                        <span style={{ fontWeight: 700, fontSize: '0.95rem', fontFamily: 'var(--font-family-display)', color: 'var(--color-text-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>Admin</span>
                     </Link>
                     <button
                         type="button"
