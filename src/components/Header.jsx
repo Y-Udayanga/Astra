@@ -343,17 +343,6 @@ const Header = () => {
         }
         .header-icon-btn:hover { background-color: var(--color-surface-2); color: var(--color-accent); }
         .nav-link:hover { color: var(--color-accent) !important; background-color: var(--color-accent-soft) !important; }
-        @media (min-width: 960px) {
-          .desktop-nav { display: flex !important; }
-          .signin-btn { display: inline-flex !important; }
-          .mobile-menu-btn { display: none !important; }
-        }
-        @media (max-width: 959px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
-          .profile-wrap { display: none !important; }
-          .signin-btn { display: none !important; }
-        }
         @media (max-width: 420px) {
           .header-icon-btn { width: 36px; height: 36px; }
         }
