@@ -18,17 +18,50 @@ const NAV_ITEMS = [
   { label: 'Contact', to: '/contact' },
 ];
 
+const DESKTOP_BREAKPOINT = '(min-width: 960px)';
+
+// Drive layout off real viewport state instead of relying on inline-style
+// vs `!important` cascade overrides, which are fragile and leave gaps
+// between breakpoints.
+const useMediaQuery = (query) => {
+  const getMatch = () =>
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia(query).matches
+      : false;
+
+  const [matches, setMatches] = useState(getMatch);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mql = window.matchMedia(query);
+    const handleChange = () => setMatches(mql.matches);
+    handleChange();
+    mql.addEventListener('change', handleChange);
+    return () => mql.removeEventListener('change', handleChange);
+  }, [query]);
+
+  return matches;
+};
+
 const Header = () => {
   const { cartCount, openCart } = useCart();
   const { isDark, toggleTheme } = useTheme();
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
+  const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
   const isAdmin = currentUser?.role === 'admin';
+
+  // If the viewport grows to desktop while the mobile drawer is open, close it
+  // so we never end up with two competing navs visible at once.
+  useEffect(() => {
+    if (isDesktop) setIsMobileMenuOpen(false);
+  }, [isDesktop]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -76,7 +109,8 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="desktop-nav" style={{ display: 'none', gap: '0.4rem', alignItems: 'center' }}>
+        {isDesktop && (
+        <nav className="desktop-nav" style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.label}
@@ -99,6 +133,7 @@ const Header = () => {
             </NavLink>
           ))}
         </nav>
+        )}
 
         {/* Right-side actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.15rem, 1.2vw, 0.5rem)', flexShrink: 0 }}>
@@ -132,8 +167,8 @@ const Header = () => {
             )}
           </motion.button>
 
-          {/* Profile / Auth */}
-          {currentUser ? (
+          {/* Profile / Auth — desktop only; on mobile these live in the drawer */}
+          {isDesktop && (currentUser ? (
             <div ref={profileRef} className="profile-wrap" style={{ position: 'relative' }}>
               <motion.button
                 onClick={() => setIsProfileOpen((v) => !v)}
@@ -192,7 +227,7 @@ const Header = () => {
             </div>
           ) : (
             <Link to="/login" className="signin-btn" style={{
-              display: 'none', alignItems: 'center', gap: '7px',
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
               padding: '0.5rem 1.1rem', borderRadius: 'var(--radius-full)',
               background: 'var(--gradient-brand)', color: '#fff',
               fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none',
@@ -200,16 +235,19 @@ const Header = () => {
             }}>
               <User size={16} /> Sign In
             </Link>
-          )}
+          ))}
 
-          <button
-            className="mobile-menu-btn"
-            onClick={() => setIsMobileMenuOpen(true)}
-            aria-label="Open menu"
-            style={{ display: 'none', color: 'var(--color-text-main)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}
-          >
-            <Menu size={24} />
-          </button>
+          {/* Hamburger — mobile only */}
+          {!isDesktop && (
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-main)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}
+            >
+              <Menu size={24} />
+            </button>
+          )}
         </div>
       </div>
 
