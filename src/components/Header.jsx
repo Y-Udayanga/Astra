@@ -259,10 +259,14 @@ const Header = () => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
+            className="mobile-menu-overlay"
             style={{
-              position: 'fixed', top: 0, right: 0, width: '100%', height: '100vh',
+              position: 'fixed', top: 0, right: 0, width: '100%',
               backgroundColor: 'var(--color-background)', zIndex: 100,
-              padding: 'var(--spacing-xl)', display: 'flex', flexDirection: 'column',
+              padding: 'var(--spacing-xl)',
+              paddingBottom: 'calc(var(--spacing-xl) + env(safe-area-inset-bottom))',
+              display: 'flex', flexDirection: 'column',
+              overflowY: 'auto',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-2xl)' }}>
@@ -343,6 +347,12 @@ const Header = () => {
         }
         .header-icon-btn:hover { background-color: var(--color-surface-2); color: var(--color-accent); }
         .nav-link:hover { color: var(--color-accent) !important; background-color: var(--color-accent-soft) !important; }
+        .mobile-menu-overlay {
+          height: 100vh;        /* fallback for browsers without dvh */
+          height: 100dvh;       /* tracks the actual visible viewport on mobile */
+          max-height: 100vh;
+          max-height: 100dvh;
+        }
         @media (max-width: 420px) {
           .header-icon-btn { width: 36px; height: 36px; }
         }
