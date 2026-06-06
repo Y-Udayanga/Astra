@@ -138,6 +138,14 @@ input, textarea, select {
     background-color: var(--color-surface-2);
 }
 
+/* Admin sidebar fills the visible viewport height. Using dvh prevents the
+   bottom actions (View Store / Logout) from being clipped behind the mobile
+   browser's address bar, which 100vh does not account for. */
+.admin-sidebar {
+    height: 100vh;
+    height: 100dvh;
+}
+
 /* Responsive helper: admin sidebar */
 @media (min-width: 1025px) {
     .admin-sidebar-close-btn { display: none !important; }
