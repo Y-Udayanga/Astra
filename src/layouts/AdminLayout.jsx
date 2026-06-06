@@ -106,13 +106,13 @@ const AdminLayout = () => {
                     width: '260px',
                     backgroundColor: 'var(--color-surface)',
                     borderRight: '1px solid var(--color-border)',
-                    height: '100vh',
                     top: 0,
                     display: 'flex',
                     flexDirection: 'column',
                     zIndex: 50,
                     transition: 'transform 0.3s ease',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    overflowY: 'auto'
                 }}
             >
                 <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -161,7 +161,7 @@ const AdminLayout = () => {
                     </ul>
                 </nav>
 
-                <div style={{ padding: '16px 12px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ padding: '16px 12px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
                     <Link
                         to="/"
                         style={{
