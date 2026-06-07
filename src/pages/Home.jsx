@@ -5,13 +5,13 @@ import { ArrowRight, Plus, Star, Truck, ShieldCheck, RefreshCw, Headphones, Spar
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { getProducts } from '../services/api';
+import { products as catalogProducts } from '../data/products';
+import { handleImgError } from '../utils/imageFallback';
 
-const fallbackProducts = [
-  { id: 1, name: 'Premium Leather Jacket', price: 299, image: 'https://images.unsplash.com/photo-1551028919-6a014909a909?auto=format&fit=crop&q=80&w=800', category: 'Outerwear' },
-  { id: 2, name: 'Minimalist Watch', price: 150, image: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=800', category: 'Accessories' },
-  { id: 3, name: 'Designer Sunglasses', price: 120, image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&q=80&w=800', category: 'Accessories' },
-  { id: 5, name: 'Urban Sneakers', price: 110, image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=800', category: 'Footwear' },
-];
+const fallbackProducts = catalogProducts.slice(0, 4).map((p) => ({
+  ...p,
+  image: (p.images && p.images[0]) || p.image,
+}));
 
 const Home = () => {
   const { addToCart } = useCart();
@@ -99,7 +99,7 @@ const Home = () => {
           {/* Hero images */}
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, delay: 0.2 }} style={{ position: 'relative', height: 'clamp(340px, 50vw, 480px)', minHeight: '320px' }}>
             <div style={{ position: 'absolute', top: '5%', right: '5%', width: '66%', height: '88%', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 30px 60px -15px rgba(0,0,0,0.35)', zIndex: 2 }}>
-              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800" alt="Fashion model" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&q=80&w=800" alt="Fashion model" onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 style={{ position: 'absolute', bottom: '20px', right: '20px', background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(10px)', padding: '10px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4ade80', boxShadow: '0 0 10px #4ade80' }} />
@@ -108,11 +108,11 @@ const Home = () => {
             </div>
             <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               style={{ position: 'absolute', bottom: 0, left: 0, width: '46%', height: '52%', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', zIndex: 3, border: '4px solid var(--color-background)' }}>
-              <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800" alt="Accessories" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800" alt="Accessories" onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </motion.div>
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1, y: [0, 15, 0] }} transition={{ opacity: { duration: 1, delay: 0.8 }, y: { duration: 5, repeat: Infinity, ease: 'easeInOut' } }}
               style={{ position: 'absolute', top: '12%', left: '-4%', width: '30%', height: '30%', borderRadius: '50%', overflow: 'hidden', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.4)', zIndex: 4, border: '3px solid var(--color-background)' }}>
-              <img src="https://images.unsplash.com/photo-1520975954732-57dd22299614?auto=format&fit=crop&q=80&w=400" alt="Detail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="https://images.unsplash.com/photo-1520975954732-57dd22299614?auto=format&fit=crop&q=80&w=400" alt="Detail" onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </motion.div>
           </motion.div>
         </div>
@@ -173,7 +173,7 @@ const Home = () => {
               <motion.div key={item.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-80px' }} transition={{ duration: 0.5, delay: i * 0.08 }} whileHover={{ y: -8 }}
                 style={{ backgroundColor: 'var(--color-background)', borderRadius: '20px', overflow: 'hidden', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column' }}>
                 <Link to={`/product/${item.id}`} style={{ display: 'block', height: 'clamp(220px, 28vw, 300px)', position: 'relative', overflow: 'hidden' }}>
-                  <motion.img whileHover={{ scale: 1.06 }} transition={{ duration: 0.4 }} src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <motion.img whileHover={{ scale: 1.06 }} transition={{ duration: 0.4 }} src={(item.images && item.images[0]) || item.image} alt={item.name} onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   {i < 2 && <span style={{ position: 'absolute', top: '12px', left: '12px', background: 'var(--gradient-brand)', color: '#fff', padding: '4px 12px', fontSize: '0.7rem', fontWeight: 700, borderRadius: 'var(--radius-full)', letterSpacing: '0.5px' }}>BESTSELLER</span>}
                 </Link>
                 <div style={{ padding: 'var(--spacing-lg)', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -213,7 +213,7 @@ const Home = () => {
               <Link key={cat.name} to="/shop" state={{ category: cat.name }} style={{ textDecoration: 'none' }}>
                 <motion.div whileHover="hover" initial="initial" whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
                   style={{ position: 'relative', height: 'clamp(300px, 40vw, 420px)', borderRadius: '20px', overflow: 'hidden', boxShadow: 'var(--shadow-md)' }}>
-                  <motion.img variants={{ initial: { scale: 1 }, hover: { scale: 1.1 } }} transition={{ duration: 0.6 }} src={`https://images.unsplash.com/photo-${cat.img}?auto=format&fit=crop&q=80&w=800`} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <motion.img variants={{ initial: { scale: 1 }, hover: { scale: 1.1 } }} transition={{ duration: 0.6 }} src={`https://images.unsplash.com/photo-${cat.img}?auto=format&fit=crop&q=80&w=800`} alt={cat.name} onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0) 100%)', display: 'flex', alignItems: 'flex-end', padding: 'var(--spacing-xl)' }}>
                     <div>
                       <h3 style={{ color: '#fff', fontSize: 'clamp(1.4rem, 2.5vw, 2rem)', fontWeight: 700, marginBottom: '8px' }}>{cat.name}</h3>
@@ -246,7 +246,7 @@ const Home = () => {
             ].map((it, i) => (
               <motion.div key={it.cls} className={it.cls} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }}
                 style={{ borderRadius: '20px', overflow: 'hidden', height: it.h }}>
-                <motion.img whileHover={{ scale: 1.05 }} transition={{ duration: 0.8 }} src={`https://images.unsplash.com/photo-${it.src}`} alt="Lookbook" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <motion.img whileHover={{ scale: 1.05 }} transition={{ duration: 0.8 }} src={`https://images.unsplash.com/photo-${it.src}`} alt="Lookbook" onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </motion.div>
             ))}
           </div>
