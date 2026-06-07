@@ -4,6 +4,7 @@ import { X, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
+import { handleImgError } from '../utils/imageFallback';
 
 const CartDrawer = () => {
     const { isCartOpen, closeCart, cartItems, removeFromCart, cartTotal } = useCart();
@@ -86,7 +87,7 @@ const CartDrawer = () => {
                                     {cartItems.map((item) => (
                                         <li key={item.id} style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
                                             <div style={{ width: '80px', height: '80px', borderRadius: 'var(--radius-md)', overflow: 'hidden', flexShrink: 0 }}>
-                                                <img src={item.images ? item.images[0] : item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <img src={item.images ? item.images[0] : item.image} alt={item.name} onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
                                             <div style={{ flex: 1 }}>
                                                 <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{item.name}</h3>
