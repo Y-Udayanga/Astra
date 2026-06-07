@@ -3,45 +3,65 @@ import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard, ShieldCheck, Lock, AlertTriangle } from 'lucide-react';
-import CryptoJS from 'crypto-js';
-import { createOrder } from '../services/api';
+import { createOrder, updateOrderStatus } from '../services/api';
+import { preparePayHerePayment, startPayHereCheckout } from '../services/payhere';
 import { handleImgError } from '../utils/imageFallback';
 
-// PayHere sandbox processes payments in LKR.
 const PAY_CURRENCY = 'LKR';
+const MIN_PAYHERE_LKR = 30;
 
 const Checkout = () => {
     const { cartItems, cartTotal, clearCart } = useCart();
     const { currentUser } = useAuth();
     const { format, convert, currency } = useCurrency();
+    const navigate = useNavigate();
 
-    // Catalog prices are stored in USD; PayHere always charges in LKR, so the
-    // amount sent for payment is the cart total converted at the live rate.
     const payAmountLKR = Number(convert(cartTotal, 'LKR'));
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [completedOrderId, setCompletedOrderId] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [configError, setConfigError] = useState('');
 
-    const location = useLocation();
-    const navigate = useNavigate();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setConfigError('');
 
-    // Handle PayHere redirect-based return (?status=success / ?status=cancel)
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        if (params.get('status') === 'success') {
-            setIsSuccess(true);
-            clearCart();
+        if (paymentMethod !== 'card') {
+            setConfigError('Only PayHere card payments are supported in this sandbox demo.');
+            return;
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [location.search]);
 
-    const persistOrder = async (orderId, form) => {
+        if (!Number.isFinite(payAmountLKR) || payAmountLKR < MIN_PAYHERE_LKR) {
+            setConfigError(`PayHere requires a minimum charge of LKR ${MIN_PAYHERE_LKR}.00. Add more items to your cart.`);
+            return;
+        }
+
+        const formData = new FormData(e.target);
+        const form = {
+            firstName: String(formData.get('firstName') || '').trim(),
+            lastName: String(formData.get('lastName') || '').trim(),
+            email: String(formData.get('email') || '').trim(),
+            address: String(formData.get('address') || '').trim(),
+            city: String(formData.get('city') || 'Colombo').trim(),
+            phone: String(formData.get('phone') || '0771234567').trim(),
+        };
+
+        if (!form.firstName || !form.lastName || !form.email || !form.address) {
+            setConfigError('Please complete all required shipping fields.');
+            return;
+        }
+
+        setIsProcessing(true);
+
         try {
+            const draftOrderId = `ORD-${Date.now()}`;
+
+            // Create a pending order before opening PayHere so webhook/client can finalize it.
             await createOrder({
-                id: orderId,
+                id: draftOrderId,
                 userId: currentUser?.id ?? null,
                 firstName: form.firstName,
                 lastName: form.lastName,
@@ -52,95 +72,62 @@ const Checkout = () => {
                 amount: Number(payAmountLKR.toFixed(2)),
                 currency: PAY_CURRENCY,
                 paymentMethod,
-                status: 'completed',
+                status: 'pending',
+            });
+
+            const paymentPrep = await preparePayHerePayment(payAmountLKR, draftOrderId);
+
+            const payment = {
+                sandbox: paymentPrep.sandbox,
+                merchant_id: paymentPrep.merchant_id,
+                // PayHere JS SDK popup mode requires these to stay undefined.
+                return_url: undefined,
+                cancel_url: undefined,
+                notify_url: paymentPrep.notify_url,
+                order_id: paymentPrep.order_id,
+                items: 'ASTRA Store Purchase',
+                amount: paymentPrep.amount,
+                currency: paymentPrep.currency,
+                hash: paymentPrep.hash,
+                first_name: form.firstName,
+                last_name: form.lastName,
+                email: form.email,
+                phone: form.phone,
+                address: form.address,
+                city: form.city || 'Colombo',
+                country: 'Sri Lanka',
+            };
+
+            await startPayHereCheckout(payment, {
+                onCompleted: async (orderId) => {
+                    const finalId = orderId || draftOrderId;
+                    try {
+                        await updateOrderStatus(finalId, 'completed', {
+                            amount: Number(paymentPrep.amount),
+                            currency: PAY_CURRENCY,
+                        });
+                    } catch (err) {
+                        console.error('Failed to mark order completed', err);
+                    }
+                    setCompletedOrderId(finalId);
+                    setIsSuccess(true);
+                    clearCart();
+                    setIsProcessing(false);
+                },
+                onDismissed: () => {
+                    setIsProcessing(false);
+                    setConfigError('Payment was cancelled. Your order remains pending — you can try again.');
+                },
+                onError: (error) => {
+                    setConfigError(typeof error === 'string' ? error : 'Payment failed. Please verify your PayHere sandbox domain and try again.');
+                    setIsProcessing(false);
+                },
             });
         } catch (err) {
-            // Don't block the success UI on a persistence failure, but log it.
-            console.error('Failed to save order to Supabase', err);
-        }
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setConfigError('');
-
-        if (paymentMethod !== 'card') {
-            setConfigError('Only PayHere card payments are supported in this sandbox demo.');
-            return;
-        }
-
-        const merchantId = import.meta.env.VITE_PAYHERE_MERCHANT_ID?.trim();
-        const merchantSecret = import.meta.env.VITE_PAYHERE_MERCHANT_SECRET?.trim();
-
-        if (!merchantId || !merchantSecret) {
-            setConfigError('PayHere is not fully configured. Add VITE_PAYHERE_MERCHANT_ID and VITE_PAYHERE_MERCHANT_SECRET (from your PayHere sandbox dashboard) to your .env file and restart the dev server.');
-            return;
-        }
-
-        if (!window.payhere) {
-            setConfigError('PayHere SDK failed to load. Check your internet connection and try again.');
-            return;
-        }
-
-        const formData = new FormData(e.target);
-        const form = {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            email: formData.get('email'),
-            address: formData.get('address'),
-            city: formData.get('city'),
-            phone: formData.get('phone') || '0771234567',
-        };
-
-        const orderId = `ORD-${Date.now()}`;
-        const amount = payAmountLKR.toFixed(2);
-
-        // hash = md5(merchant_id + order_id + amount + currency + md5(merchant_secret).toUpperCase()).toUpperCase()
-        const hashedSecret = CryptoJS.MD5(merchantSecret).toString().toUpperCase();
-        const hash = CryptoJS.MD5(merchantId + orderId + amount + PAY_CURRENCY + hashedSecret).toString().toUpperCase();
-
-        // Use the domain the app is actually served from (localhost in dev,
-        // the Vercel URL in production). PayHere authorizes requests against
-        // the calling domain, so this must match a domain approved in your
-        // PayHere "Domains & Credentials" settings.
-        const origin = window.location.origin;
-        const payment = {
-            sandbox: true,
-            merchant_id: merchantId,
-            return_url: `${origin}/checkout?status=success`,
-            cancel_url: `${origin}/checkout?status=cancel`,
-            notify_url: `${origin}/checkout`, // No server in this SPA; client callbacks handle status.
-            order_id: orderId,
-            items: 'ASTRA Store Purchase',
-            amount,
-            currency: PAY_CURRENCY,
-            hash,
-            first_name: form.firstName,
-            last_name: form.lastName,
-            email: form.email,
-            phone: form.phone,
-            address: form.address,
-            city: form.city || 'Colombo',
-            country: 'Sri Lanka',
-        };
-
-        setIsProcessing(true);
-
-        window.payhere.onCompleted = async function onCompleted(completedOrderId) {
-            await persistOrder(completedOrderId || orderId, form);
+            console.error('Checkout payment error', err);
+            setConfigError(err.message || 'Unable to start PayHere payment.');
             setIsProcessing(false);
-            setIsSuccess(true);
-            clearCart();
-        };
-        window.payhere.onDismissed = function onDismissed() {
-            setIsProcessing(false);
-        };
-        window.payhere.onError = function onError(error) {
-            setConfigError(`Payment error: ${error}`);
-            setIsProcessing(false);
-        };
-
-        window.payhere.startPayment(payment);
+        }
     };
 
     if (isSuccess) {
@@ -151,9 +138,9 @@ const Checkout = () => {
                         <CheckCircle size={56} color="var(--color-success)" />
                     </div>
                 </motion.div>
-                <h2 style={{ marginTop: 'var(--spacing-lg)', marginBottom: 'var(--spacing-sm)', fontSize: '2rem' }}>Order Placed Successfully!</h2>
-                <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-xl)', maxWidth: '420px' }}>
-                    Thank you for your purchase. A confirmation has been sent to your email and your order is now visible in your profile.
+                <h2 style={{ marginTop: 'var(--spacing-lg)', marginBottom: 'var(--spacing-sm)', fontSize: '2rem' }}>Payment Successful!</h2>
+                <p style={{ color: 'var(--color-text-muted)', marginBottom: 'var(--spacing-md)', maxWidth: '420px' }}>
+                    Thank you for your purchase. Your order{completedOrderId ? ` (${completedOrderId})` : ''} has been recorded.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <button onClick={() => navigate('/profile?tab=orders')} style={{ padding: '12px 26px', borderRadius: 'var(--radius-full)', background: 'var(--gradient-brand)', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', boxShadow: 'var(--shadow-glow)' }}>View My Orders</button>
@@ -193,7 +180,6 @@ const Checkout = () => {
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 'var(--spacing-2xl)' }}>
-                {/* Form */}
                 <div>
                     <SectionTitle>Shipping Information</SectionTitle>
                     <form id="checkout-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
@@ -205,7 +191,7 @@ const Checkout = () => {
                         <Input name="address" placeholder="Street Address" required />
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
                             <Input name="city" placeholder="City" defaultValue="Colombo" />
-                            <Input name="phone" placeholder="Phone" type="tel" />
+                            <Input name="phone" placeholder="Phone (07XXXXXXXX)" type="tel" defaultValue="0771234567" />
                         </div>
 
                         <SectionTitle style={{ marginTop: 'var(--spacing-md)' }}>Payment Method</SectionTitle>
@@ -218,14 +204,16 @@ const Checkout = () => {
                         {paymentMethod === 'card' && (
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                                    <Lock size={14} /> Secured by PayHere — you'll complete payment in a secure popup.
+                                    <Lock size={14} /> Secured by PayHere sandbox — payment hash is generated server-side.
+                                </div>
+                                <div style={{ fontSize: '0.82rem', color: 'var(--color-text-subtle)', lineHeight: 1.5 }}>
+                                    Sandbox test card: 4916 0000 0000 0000 · Exp 01/28 · CVV 100 · Name: S. Perera
                                 </div>
                             </motion.div>
                         )}
                     </form>
                 </div>
 
-                {/* Order Summary */}
                 <div style={{ backgroundColor: 'var(--color-surface)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', height: 'fit-content', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-md)' }}>
                     <h3 style={{ marginBottom: 'var(--spacing-lg)' }}>Order Summary</h3>
                     <div style={{ maxHeight: '280px', overflowY: 'auto', marginBottom: 'var(--spacing-md)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -248,25 +236,23 @@ const Checkout = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 800 }}>
                         <span>Total</span><span>{format(cartTotal)}</span>
                     </div>
-                    {currency !== 'LKR' && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
-                            <span>Charged in LKR</span>
-                            <span>Rs {payAmountLKR.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-                        </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                        <span>Charged in LKR</span>
+                        <span>Rs {payAmountLKR.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
 
-                    <button type="submit" form="checkout-form" disabled={isProcessing} style={{
+                    <button type="submit" form="checkout-form" disabled={isProcessing || payAmountLKR < MIN_PAYHERE_LKR} style={{
                         width: '100%', marginTop: 'var(--spacing-lg)', padding: 'var(--spacing-md)',
                         background: 'var(--gradient-brand)', color: '#fff', fontSize: '1rem', fontWeight: 700,
-                        borderRadius: 'var(--radius-full)', opacity: isProcessing ? 0.7 : 1,
-                        cursor: isProcessing ? 'not-allowed' : 'pointer', border: 'none', boxShadow: 'var(--shadow-glow)',
+                        borderRadius: 'var(--radius-full)', opacity: isProcessing || payAmountLKR < MIN_PAYHERE_LKR ? 0.7 : 1,
+                        cursor: isProcessing || payAmountLKR < MIN_PAYHERE_LKR ? 'not-allowed' : 'pointer', border: 'none', boxShadow: 'var(--shadow-glow)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     }}>
-                        {isProcessing ? 'Processing Payment...' : <><Lock size={17} /> Pay {format(cartTotal)}</>}
+                        {isProcessing ? 'Opening PayHere...' : <><Lock size={17} /> Pay {format(cartTotal)}</>}
                     </button>
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: 'var(--spacing-md)', color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-                        <ShieldCheck size={15} /> 256-bit SSL secured checkout
+                        <ShieldCheck size={15} /> Hash generated server-side · PayHere sandbox
                     </div>
                 </div>
             </div>
