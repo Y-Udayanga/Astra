@@ -1,14 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { products } from '../data/products';
+import { handleImgError } from '../utils/imageFallback';
 
-const categories = [
-    { name: "Outerwear", image: "https://images.unsplash.com/photo-1551028919-6a014909a909?auto=format&fit=crop&q=80&w=800", count: 12 },
-    { name: "Accessories", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=800", count: 24 },
-    { name: "Pants", image: "https://images.unsplash.com/photo-1542272617-08f083157f5d?auto=format&fit=crop&q=80&w=800", count: 8 },
-    { name: "Footwear", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=800", count: 15 },
-    { name: "Tops", image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800", count: 30 },
-];
+const categoryImages = {
+    Outerwear: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=800",
+    Accessories: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=800",
+    Pants: "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&q=80&w=800",
+    Footwear: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=800",
+    Tops: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800",
+};
+
+const categories = Object.keys(categoryImages).map((name) => ({
+    name,
+    image: categoryImages[name],
+    count: products.filter((p) => p.category === name).length,
+}));
 
 const Categories = () => {
     return (
@@ -35,7 +43,7 @@ const Categories = () => {
                         style={{ position: 'relative', height: '250px', borderRadius: 'var(--radius-lg)', overflow: 'hidden', cursor: 'pointer' }}
                     >
                         <Link to="/shop" state={{ category: cat.name }} style={{ display: 'block', height: '100%', width: '100%', textDecoration: 'none' }}>
-                            <img src={cat.image} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={cat.image} alt={cat.name} onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                                 <h2 style={{ color: 'white', fontSize: '2rem', margin: 0, fontFamily: 'var(--font-family-display)' }}>{cat.name}</h2>
                                 <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>{cat.count} Items</p>
