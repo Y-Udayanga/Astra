@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { CartProvider } from './context/CartContext';
@@ -7,36 +7,37 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 
-// Layouts
 import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
 
-// Public Pages
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import Categories from './pages/Categories';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import ProductDetails from './pages/ProductDetails';
-import Checkout from './pages/Checkout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Sell from './pages/Sell';
-import Profile from './pages/Profile';
+const Home = lazy(() => import('./pages/Home'));
+const Shop = lazy(() => import('./pages/Shop'));
+const Categories = lazy(() => import('./pages/Categories'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const ProductDetails = lazy(() => import('./pages/ProductDetails'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Sell = lazy(() => import('./pages/Sell'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const Products = lazy(() => import('./pages/admin/Products'));
+const Orders = lazy(() => import('./pages/admin/Orders'));
+const Customers = lazy(() => import('./pages/admin/Customers'));
+const Settings = lazy(() => import('./pages/admin/Settings'));
 
-// Admin Pages
-import Dashboard from './pages/admin/Dashboard';
-import Products from './pages/admin/Products';
-import Orders from './pages/admin/Orders';
-import Customers from './pages/admin/Customers';
-import Settings from './pages/admin/Settings';
+const PageLoader = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh', color: 'var(--color-text-muted)' }}>
+    Loading...
+  </div>
+);
 
-// Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { currentUser, loading } = useAuth();
 
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
+    return <PageLoader />;
   }
 
   if (!currentUser) {
@@ -54,44 +55,43 @@ const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        {/* Public Routes with MainLayout */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/categories" element={<Categories />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/sell" element={<Sell />} />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
+    <Suspense fallback={<PageLoader />}>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/sell" element={<Sell />} />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+          </Route>
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          <Route path="/admin" element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminLayout />
             </ProtectedRoute>
-          } />
-        </Route>
-
-        {/* Auth Routes (No Layout) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Admin Routes with AdminLayout */}
-        <Route path="/admin" element={
-          <ProtectedRoute adminOnly={true}>
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="products" element={<Products />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="customers" element={<Customers />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
-    </AnimatePresence>
+          }>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="products" element={<Products />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </AnimatePresence>
+    </Suspense>
   );
 };
 
