@@ -5,23 +5,18 @@ import { ArrowRight, Plus, Star, Truck, ShieldCheck, RefreshCw, Headphones, Spar
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { getProducts } from '../services/api';
-import { products as catalogProducts } from '../data/products';
+import { fetchStorefrontProducts } from '../services/catalog';
 import { handleImgError } from '../utils/imageFallback';
-
-const fallbackProducts = catalogProducts.slice(0, 4).map((p) => ({
-  ...p,
-  image: (p.images && p.images[0]) || p.image,
-}));
 
 const Home = () => {
   const { addToCart } = useCart();
   const { format } = useCurrency();
-  const [products, setProducts] = useState(fallbackProducts);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     let active = true;
-    getProducts()
-      .then((rows) => { if (active && rows.length) setProducts(rows.slice(0, 4)); })
+    fetchStorefrontProducts()
+      .then((rows) => { if (active) setProducts(rows.slice(0, 4)); })
       .catch((err) => console.error('Home: failed to load products', err));
     return () => { active = false; };
   }, []);
