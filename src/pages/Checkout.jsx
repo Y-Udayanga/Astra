@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard, ShieldCheck, Lock, AlertTriangle } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 import { createOrder } from '../services/api';
+import { handleImgError } from '../utils/imageFallback';
 
 // PayHere sandbox processes payments in LKR.
 const PAY_CURRENCY = 'LKR';
@@ -14,7 +15,11 @@ const PAY_CURRENCY = 'LKR';
 const Checkout = () => {
     const { cartItems, cartTotal, clearCart } = useCart();
     const { currentUser } = useAuth();
-    const { format } = useCurrency();
+    const { format, convert, currency } = useCurrency();
+
+    // Catalog prices are stored in USD; PayHere always charges in LKR, so the
+    // amount sent for payment is the cart total converted at the live rate.
+    const payAmountLKR = Number(convert(cartTotal, 'LKR'));
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('card');
@@ -44,7 +49,7 @@ const Checkout = () => {
                 address: form.address,
                 city: form.city || 'Colombo',
                 country: 'Sri Lanka',
-                amount: Number(cartTotal),
+                amount: Number(payAmountLKR.toFixed(2)),
                 currency: PAY_CURRENCY,
                 paymentMethod,
                 status: 'completed',
@@ -88,7 +93,7 @@ const Checkout = () => {
         };
 
         const orderId = `ORD-${Date.now()}`;
-        const amount = Number(cartTotal).toFixed(2);
+        const amount = payAmountLKR.toFixed(2);
 
         // hash = md5(merchant_id + order_id + amount + currency + md5(merchant_secret).toUpperCase()).toUpperCase()
         const hashedSecret = CryptoJS.MD5(merchantSecret).toString().toUpperCase();
@@ -227,7 +232,7 @@ const Checkout = () => {
                         {cartItems.map((item) => (
                             <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ width: '48px', height: '48px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--color-surface-2)' }}>
-                                    <img src={item.images ? item.images[0] : item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <img src={item.images ? item.images[0] : item.image} alt={item.name} onError={handleImgError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</div>
@@ -243,6 +248,12 @@ const Checkout = () => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 800 }}>
                         <span>Total</span><span>{format(cartTotal)}</span>
                     </div>
+                    {currency !== 'LKR' && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                            <span>Charged in LKR</span>
+                            <span>Rs {payAmountLKR.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                        </div>
+                    )}
 
                     <button type="submit" form="checkout-form" disabled={isProcessing} style={{
                         width: '100%', marginTop: 'var(--spacing-lg)', padding: 'var(--spacing-md)',
