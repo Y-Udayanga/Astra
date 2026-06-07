@@ -7,8 +7,8 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { getLocalProduct, getRelatedProducts } from '../data/products';
-import { getProduct } from '../services/api';
+import { fetchStorefrontProduct } from '../services/catalog';
+import { getRelatedProducts } from '../data/products';
 import { handleImgError } from '../utils/imageFallback';
 
 const MOCK_REVIEWS = [
@@ -23,8 +23,8 @@ const ProductDetails = () => {
     const { addToCart, updateQuantity, openCart } = useCart();
     const { format } = useCurrency();
 
-    const [product, setProduct] = useState(() => getLocalProduct(id));
-    const [loading, setLoading] = useState(() => !getLocalProduct(id));
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
 
     const [mainIndex, setMainIndex] = useState(0);
@@ -35,26 +35,30 @@ const ProductDetails = () => {
     const [wishlisted, setWishlisted] = useState(false);
     const [added, setAdded] = useState(false);
 
-    // Resolve the product for the current :id. Local demo catalog first (ids
-    // 1-6), then fall back to a Supabase lookup for admin-created products.
     useEffect(() => {
         let active = true;
-        const local = getLocalProduct(id);
-        if (local) {
-            setProduct(local);
-            setLoading(false);
-            setNotFound(false);
-            return;
-        }
         setLoading(true);
-        getProduct(id)
+        setNotFound(false);
+
+        fetchStorefrontProduct(id)
             .then((row) => {
                 if (!active) return;
-                if (row) { setProduct(row); setNotFound(false); }
-                else setNotFound(true);
+                if (row) {
+                    setProduct(row);
+                    setNotFound(false);
+                } else {
+                    setProduct(null);
+                    setNotFound(true);
+                }
             })
-            .catch(() => { if (active) setNotFound(true); })
+            .catch(() => {
+                if (active) {
+                    setProduct(null);
+                    setNotFound(true);
+                }
+            })
             .finally(() => { if (active) setLoading(false); });
+
         return () => { active = false; };
     }, [id]);
 

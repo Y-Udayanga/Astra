@@ -1,29 +1,41 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { ShoppingBag, Search, Filter, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { products, CATEGORIES as categories } from '../data/products';
+import { CATEGORIES as categories } from '../data/products';
+import { fetchStorefrontProducts, searchProducts } from '../services/catalog';
 import { handleImgError } from '../utils/imageFallback';
 
 const Shop = () => {
     const { addToCart } = useCart();
     const { format } = useCurrency();
     const location = useLocation();
-    const [searchQuery, setSearchQuery] = useState('');
-    // Honor a category passed via navigation state (from Home / Categories links).
+    const [searchParams] = useSearchParams();
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
     const [selectedCategory, setSelectedCategory] = useState(location.state?.category || 'All');
     const [sortBy, setSortBy] = useState('featured');
     const [isFilterOpen, setIsFilterOpen] = useState(Boolean(location.state?.category));
 
-    const filteredProducts = useMemo(() => {
-        let result = [...products];
+    useEffect(() => {
+        let active = true;
+        fetchStorefrontProducts()
+            .then((rows) => { if (active) setProducts(rows); })
+            .catch((err) => console.error('Shop: failed to load products', err))
+            .finally(() => { if (active) setLoading(false); });
+        return () => { active = false; };
+    }, []);
 
-        // Search Filter
-        if (searchQuery) {
-            result = result.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-        }
+    useEffect(() => {
+        const q = searchParams.get('q');
+        if (q) setSearchQuery(q);
+    }, [searchParams]);
+
+    const filteredProducts = useMemo(() => {
+        let result = searchProducts(products, searchQuery);
 
         // Category Filter
         if (selectedCategory !== 'All') {
@@ -43,7 +55,15 @@ const Shop = () => {
         }
 
         return result;
-    }, [searchQuery, selectedCategory, sortBy]);
+    }, [products, searchQuery, selectedCategory, sortBy]);
+
+    if (loading) {
+        return (
+            <div style={{ padding: 'var(--spacing-3xl) var(--spacing-xl)', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                Loading collection...
+            </div>
+        );
+    }
 
     return (
         <motion.div
@@ -85,7 +105,7 @@ const Shop = () => {
                             <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
                             <input
                                 type="text"
-                                placeholder="Search products..."
+                                placeholder="Search products, categories..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 style={{
