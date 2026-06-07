@@ -60,6 +60,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const profileRef = useRef(null);
   const currencyRef = useRef(null);
 
@@ -89,6 +90,13 @@ const Header = () => {
     setIsMobileMenuOpen(false);
     await logout();
     navigate('/');
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchTerm.trim();
+    setIsMobileMenuOpen(false);
+    navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop');
   };
 
   return (
@@ -214,9 +222,22 @@ const Header = () => {
             {isDark ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
 
-          <Link to="/shop" aria-label="Search products">
-            <IconButton label="Search"><Search size={19} /></IconButton>
-          </Link>
+          {isDesktop ? (
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-full)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface-2)', minWidth: '140px', maxWidth: '200px' }}>
+              <Search size={16} color="var(--color-text-muted)" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search..."
+                aria-label="Search products"
+                style={{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--color-text-main)', fontSize: '0.85rem', width: '100%' }}
+              />
+            </form>
+          ) : (
+            <IconButton onClick={() => setIsMobileMenuOpen(true)} label="Open menu search">
+              <Search size={19} />
+            </IconButton>
+          )}
 
           {/* Cart */}
           <motion.button
@@ -358,6 +379,17 @@ const Header = () => {
                 </div>
               </div>
             )}
+
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.65rem 0.85rem', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface-2)', marginBottom: 'var(--spacing-lg)' }}>
+              <Search size={18} color="var(--color-text-muted)" />
+              <input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search products..."
+                aria-label="Search products"
+                style={{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--color-text-main)', fontSize: '1rem', width: '100%' }}
+              />
+            </form>
 
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '1.2rem', fontWeight: 600 }}>
               {NAV_ITEMS.map((item) => (
