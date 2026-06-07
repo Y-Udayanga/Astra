@@ -197,6 +197,18 @@ export const createOrder = async (orderData) => {
     return mapOrder(data);
 };
 
+export const updateOrderStatus = async (id, status, extra = {}) => {
+    const { data, error } = await supabase
+        .from('orders')
+        .update({ status, ...extra })
+        .eq('id', id)
+        .select('*')
+        .single();
+
+    throwIfError(error, 'Failed to update order');
+    return mapOrder(data);
+};
+
 export const getMyOrders = async () => {
     const user = await getCurrentUser();
     if (!user) {
@@ -274,6 +286,7 @@ export const api = {
     getOrders,
     getOrder,
     createOrder,
+    updateOrderStatus,
     getMyOrders,
     getCustomers,
     getStoreSettings,
