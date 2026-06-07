@@ -2,13 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart, Search, Menu, User, Sun, Moon, X,
-  LogOut, LayoutDashboard, Package, UserCircle, ChevronDown
+  LogOut, LayoutDashboard, Package, UserCircle, ChevronDown, Globe, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency, CURRENCIES } from '../context/CurrencyContext';
+
+const CURRENCY_SYMBOLS = Object.fromEntries(
+  Object.values(CURRENCIES).map((c) => [c.code, c.symbol])
+);
 
 const NAV_ITEMS = [
   { label: 'Home', to: '/' },
@@ -47,13 +52,16 @@ const Header = () => {
   const { cartCount, openCart } = useCart();
   const { isDark, toggleTheme } = useTheme();
   const { currentUser, logout } = useAuth();
+  const { country, currency, countries, setCountry } = useCurrency();
   const navigate = useNavigate();
 
   const isDesktop = useMediaQuery(DESKTOP_BREAKPOINT);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
   const profileRef = useRef(null);
+  const currencyRef = useRef(null);
 
   const isAdmin = currentUser?.role === 'admin';
 
@@ -67,6 +75,9 @@ const Header = () => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setIsProfileOpen(false);
+      }
+      if (currencyRef.current && !currencyRef.current.contains(e.target)) {
+        setIsCurrencyOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -137,6 +148,68 @@ const Header = () => {
 
         {/* Right-side actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.15rem, 1.2vw, 0.5rem)', flexShrink: 0 }}>
+          {/* Country / currency selector */}
+          <div ref={currencyRef} style={{ position: 'relative' }}>
+            <motion.button
+              onClick={() => setIsCurrencyOpen((v) => !v)}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              aria-label="Select country and currency"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '0.45rem 0.7rem', borderRadius: 'var(--radius-full)',
+                border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface-2)',
+                color: 'var(--color-text-main)', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
+              }}
+            >
+              <span style={{ fontSize: '1rem', lineHeight: 1 }}>{country.flag}</span>
+              <span>{currency}</span>
+              <ChevronDown size={14} color="var(--color-text-muted)" style={{ transform: isCurrencyOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </motion.button>
+
+            <AnimatePresence>
+              {isCurrencyOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                  transition={{ duration: 0.15 }}
+                  style={{
+                    position: 'absolute', top: 'calc(100% + 10px)', right: 0, width: '230px',
+                    backgroundColor: 'var(--color-elevated)', borderRadius: '14px',
+                    border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-premium)',
+                    overflow: 'hidden', zIndex: 60, padding: '6px',
+                  }}
+                >
+                  <div style={{ padding: '8px 10px 6px', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--color-text-subtle)' }}>
+                    Country &amp; Currency
+                  </div>
+                  {countries.map((c) => (
+                    <button
+                      key={c.code}
+                      onClick={() => { setCountry(c.code); setIsCurrencyOpen(false); }}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                        padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                        background: c.code === country.code ? 'var(--color-accent-soft)' : 'transparent',
+                        color: 'var(--color-text-main)', fontSize: '0.9rem', fontWeight: 500, textAlign: 'left',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{c.flag}</span>
+                      <span style={{ flex: 1 }}>
+                        <span style={{ display: 'block', fontWeight: 600 }}>{c.name}</span>
+                        <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                          {CURRENCY_SYMBOLS[c.currency]} {c.currency}
+                        </span>
+                      </span>
+                      {c.code === country.code && <Check size={16} color="var(--color-accent)" />}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <IconButton onClick={toggleTheme} label="Toggle theme">
             {isDark ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
@@ -304,7 +377,38 @@ const Header = () => {
               ))}
             </nav>
 
-            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {/* Country / currency picker (mobile) */}
+            <div style={{ marginTop: 'var(--spacing-xl)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', color: 'var(--color-text-subtle)', marginBottom: '10px' }}>
+                <Globe size={15} /> Country &amp; Currency
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {countries.map((c) => (
+                  <button
+                    key={c.code}
+                    onClick={() => setCountry(c.code)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '12px', padding: '0.85rem 1rem',
+                      borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                      border: c.code === country.code ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
+                      background: c.code === country.code ? 'var(--color-accent-soft)' : 'var(--color-surface-2)',
+                      color: 'var(--color-text-main)',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>{c.flag}</span>
+                    <span style={{ flex: 1 }}>
+                      <span style={{ display: 'block', fontWeight: 700, fontSize: '1rem' }}>{c.name}</span>
+                      <span style={{ display: 'block', fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
+                        {CURRENCY_SYMBOLS[c.currency]} {c.currency}
+                      </span>
+                    </span>
+                    {c.code === country.code && <Check size={18} color="var(--color-accent)" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', paddingTop: 'var(--spacing-lg)' }}>
               {currentUser ? (
                 <>
                   <MobileAction onClick={() => { setIsMobileMenuOpen(false); navigate('/profile'); }}>
