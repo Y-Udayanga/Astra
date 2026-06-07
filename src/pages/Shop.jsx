@@ -1,31 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, Filter, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCurrency } from '../context/CurrencyContext';
-
-const products = [
-    { id: 1, name: "Premium Leather Jacket", price: 299, category: "Outerwear", image: "https://images.unsplash.com/photo-1551028919-6a014909a909?auto=format&fit=crop&q=80&w=500" },
-    { id: 2, name: "Minimalist Watch", price: 150, category: "Accessories", image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&q=80&w=500" },
-    { id: 3, name: "Designer Sunglasses", price: 120, category: "Accessories", image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&q=80&w=500" },
-    { id: 4, name: "Classic Denim Jeans", price: 89, category: "Pants", image: "https://images.unsplash.com/photo-1542272617-08f083157f5d?auto=format&fit=crop&q=80&w=500" },
-    { id: 5, name: "Urban Sneakers", price: 110, category: "Footwear", image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=500" },
-    { id: 6, name: "Cotton Blend Hoodie", price: 65, category: "Tops", image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=500" },
-];
-
-const categories = ["All", "Outerwear", "Accessories", "Pants", "Footwear", "Tops"];
+import { products, CATEGORIES as categories } from '../data/products';
+import { handleImgError } from '../utils/imageFallback';
 
 const Shop = () => {
     const { addToCart } = useCart();
     const { format } = useCurrency();
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
+    // Honor a category passed via navigation state (from Home / Categories links).
+    const [selectedCategory, setSelectedCategory] = useState(location.state?.category || 'All');
     const [sortBy, setSortBy] = useState('featured');
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [isFilterOpen, setIsFilterOpen] = useState(Boolean(location.state?.category));
 
     const filteredProducts = useMemo(() => {
-        let result = products;
+        let result = [...products];
 
         // Search Filter
         if (searchQuery) {
@@ -214,8 +207,9 @@ const Shop = () => {
                                     <motion.img
                                         whileHover={{ scale: 1.05 }}
                                         transition={{ duration: 0.4 }}
-                                        src={product.image}
+                                        src={(product.images && product.images[0]) || product.image}
                                         alt={product.name}
+                                        onError={handleImgError}
                                         style={{
                                             width: '100%',
                                             height: '280px',
