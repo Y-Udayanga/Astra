@@ -91,9 +91,7 @@ const Settings = () => {
                             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Currency</label>
                             <select value={form.currency} onChange={handleChange('currency')} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-background)', color: 'var(--color-text-main)' }}>
                                 <option value="USD">USD ($)</option>
-                                <option value="EUR">EUR (€)</option>
-                                <option value="GBP">GBP (£)</option>
-                                <option value="LKR">LKR (Rs.)</option>
+                                <option value="LKR">LKR (Rs)</option>
                             </select>
                         </div>
                     </div>
