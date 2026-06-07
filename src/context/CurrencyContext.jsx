@@ -24,14 +24,41 @@ export const COUNTRIES = [
 const FALLBACK_RATE_LKR = 300;
 
 const STORAGE_KEY = 'astra_country';
+const RATES_CACHE_KEY = 'astra_fx_rates';
+const RATES_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 const getCountryByCode = (code) => COUNTRIES.find((c) => c.code === code);
+
+const readCachedRates = () => {
+    if (typeof sessionStorage === 'undefined') return null;
+    try {
+        const raw = sessionStorage.getItem(RATES_CACHE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed?.rates?.LKR || Date.now() - parsed.ts > RATES_TTL_MS) return null;
+        return parsed.rates;
+    } catch {
+        return null;
+    }
+};
+
+const writeCachedRates = (rates) => {
+    try {
+        sessionStorage.setItem(RATES_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates }));
+    } catch { /* ignore quota errors */ }
+};
+
+// Round LKR display prices to whole rupees for cleaner storefront pricing.
+const prettifyConverted = (value, code) => {
+    if (code === 'LKR') return Math.round(value);
+    return value;
+};
 
 export const CurrencyProvider = ({ children }) => {
     // Default to Sri Lanka for this store; overridden by saved choice / geo-IP.
     const [countryCode, setCountryCode] = useState('LK');
     // Live exchange rates relative to the USD base. rates.USD is always 1.
-    const [rates, setRates] = useState({ USD: 1, LKR: FALLBACK_RATE_LKR });
+    const [rates, setRates] = useState(() => readCachedRates() || { USD: 1, LKR: FALLBACK_RATE_LKR });
     // True once we've resolved the initial country (saved pref or geo lookup),
     // so we don't flash the wrong currency before detection completes.
     const [detected, setDetected] = useState(false);
@@ -69,12 +96,20 @@ export const CurrencyProvider = ({ children }) => {
     // 2) Fetch the live USD -> LKR rate so converted prices track the market.
     useEffect(() => {
         let active = true;
+        const cached = readCachedRates();
+        if (cached) {
+            setRates(cached);
+            return;
+        }
+
         fetch('https://open.er-api.com/v6/latest/USD')
             .then((r) => (r.ok ? r.json() : Promise.reject(new Error('rate lookup failed'))))
             .then((data) => {
                 const lkr = data?.rates?.LKR;
                 if (active && typeof lkr === 'number' && lkr > 0) {
-                    setRates({ USD: 1, LKR: lkr });
+                    const next = { USD: 1, LKR: lkr };
+                    setRates(next);
+                    writeCachedRates(next);
                 }
             })
             .catch((err) => console.error('Failed to load FX rate, using fallback', err));
@@ -85,7 +120,8 @@ export const CurrencyProvider = ({ children }) => {
     const convert = useCallback(
         (amountInBase, toCurrency = currency) => {
             const rate = rates[toCurrency] ?? 1;
-            return Number(amountInBase || 0) * rate;
+            const raw = Number(amountInBase || 0) * rate;
+            return prettifyConverted(raw, toCurrency);
         },
         [rates, currency]
     );
