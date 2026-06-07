@@ -6,7 +6,11 @@ import {
   ArrowUpRight, RefreshCw, Plus, AlertTriangle, Boxes
 } from 'lucide-react';
 import { getCustomers, getOrders, getProducts } from '../../services/api';
-import { useCurrency } from '../../context/CurrencyContext';
+
+// Orders are persisted in LKR (PayHere settlement currency), so the admin
+// dashboard reports revenue in LKR directly rather than converting through the
+// storefront's customer-facing currency.
+const fmtCurrency = (n) => `Rs ${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
 const statusMeta = {
   completed: { label: 'Completed', color: '#10B981' },
@@ -18,7 +22,6 @@ const statusMeta = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { format: fmtCurrency } = useCurrency();
   const [data, setData] = useState({ products: [], orders: [], customers: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
