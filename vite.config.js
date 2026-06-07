@@ -5,7 +5,6 @@ import {
     MIN_AMOUNT_LKR,
     formatAmount,
     generatePaymentHash,
-    getPayHereCredentials,
     resolveNotifyOrigin,
     readJsonBody,
     readFormBody,
@@ -15,12 +14,9 @@ import {
 // Local dev shim for Vercel serverless routes (/api/*) so PayHere hash
 // generation works with `npm run dev` without exposing secrets in the bundle.
 function payhereDevApi(env) {
-    // Make .env values available to getPayHereCredentials() during dev.
-    process.env.VITE_PAYHERE_MERCHANT_ID = env.VITE_PAYHERE_MERCHANT_ID;
-    process.env.VITE_PAYHERE_MERCHANT_SECRET = env.VITE_PAYHERE_MERCHANT_SECRET;
-    process.env.PAYHERE_MERCHANT_ID = env.PAYHERE_MERCHANT_ID;
-    process.env.PAYHERE_MERCHANT_SECRET = env.PAYHERE_MERCHANT_SECRET;
-    process.env.PAYHERE_SANDBOX = env.PAYHERE_SANDBOX;
+    const merchantId = env.PAYHERE_MERCHANT_ID || env.VITE_PAYHERE_MERCHANT_ID || '';
+    const merchantSecret = env.PAYHERE_MERCHANT_SECRET || env.VITE_PAYHERE_MERCHANT_SECRET || '';
+    const sandbox = (env.PAYHERE_SANDBOX ?? 'true') !== 'false';
 
     return {
         name: 'payhere-dev-api',
@@ -38,7 +34,6 @@ function payhereDevApi(env) {
                 }
 
                 if (req.url === '/api/payhere-hash' && req.method === 'POST') {
-                    const { merchantId, merchantSecret, sandbox } = getPayHereCredentials();
                     if (!merchantId || !merchantSecret) {
                         res.statusCode = 500;
                         res.setHeader('Content-Type', 'application/json');
@@ -86,10 +81,8 @@ function payhereDevApi(env) {
                 }
 
                 if (req.url === '/api/payhere-notify' && req.method === 'POST') {
-                    // PayHere cannot reach localhost; acknowledge so sandbox doesn't retry endlessly.
                     try {
                         const params = await readFormBody(req);
-                        const { merchantSecret } = getPayHereCredentials();
                         if (merchantSecret && verifyNotificationSignature(params, merchantSecret)) {
                             console.info('[dev] PayHere notify verified for', params.order_id, 'status', params.status_code);
                         }
