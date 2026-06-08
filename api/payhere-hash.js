@@ -6,7 +6,7 @@ import {
     getPayHereCredentials,
     resolveNotifyOrigin,
     readJsonBody,
-} from '../lib/payhere.mjs';
+} from './lib/payhere.mjs';
 
 export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');

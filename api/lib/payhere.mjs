@@ -43,6 +43,19 @@ export function verifyNotificationSignature(params, merchantSecret) {
 }
 
 export function readJsonBody(req) {
+    if (req.body !== undefined && req.body !== null) {
+        if (typeof req.body === 'object') {
+            return Promise.resolve(req.body);
+        }
+        if (typeof req.body === 'string') {
+            try {
+                return Promise.resolve(req.body ? JSON.parse(req.body) : {});
+            } catch (err) {
+                return Promise.reject(err);
+            }
+        }
+    }
+
     return new Promise((resolve, reject) => {
         let data = '';
         req.on('data', (chunk) => { data += chunk; });
@@ -58,6 +71,21 @@ export function readJsonBody(req) {
 }
 
 export function readFormBody(req) {
+    if (req.body !== undefined && req.body !== null) {
+        if (typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
+            return Promise.resolve(req.body);
+        }
+        if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
+            try {
+                const raw = String(req.body);
+                const params = new URLSearchParams(raw);
+                return Promise.resolve(Object.fromEntries(params.entries()));
+            } catch (err) {
+                return Promise.reject(err);
+            }
+        }
+    }
+
     return new Promise((resolve, reject) => {
         let data = '';
         req.on('data', (chunk) => { data += chunk; });

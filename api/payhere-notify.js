@@ -3,7 +3,7 @@ import {
     getPayHereCredentials,
     verifyNotificationSignature,
     readFormBody,
-} from '../lib/payhere.mjs';
+} from './lib/payhere.mjs';
 
 const statusFromPayHere = (statusCode) => {
     // PayHere: 2 = success, 0 = pending, -1 = canceled, -2 = failed, -3 = chargedback
