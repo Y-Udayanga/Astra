@@ -1,16 +1,21 @@
 const PAYHERE_HASH_PATH = '/api/payhere-hash';
 
 function sanitizePayHerePayment(payment) {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const normalized = {
         ...payment,
         merchant_id: String(payment.merchant_id ?? ''),
         amount: String(payment.amount ?? ''),
         currency: String(payment.currency ?? 'LKR'),
-        // PayHere requires these keys; undefined becomes the literal string "undefined".
-        return_url: payment.return_url ?? `${origin}/checkout`,
-        cancel_url: payment.cancel_url ?? `${origin}/checkout`,
     };
+    
+    // Explicitly delete return_url and cancel_url if they are not provided 
+    // or set to undefined, as the Onsite Checkout popup requires them to be omitted.
+    if (normalized.return_url === undefined || normalized.return_url === '') {
+        delete normalized.return_url;
+    }
+    if (normalized.cancel_url === undefined || normalized.cancel_url === '') {
+        delete normalized.cancel_url;
+    }
 
     return Object.fromEntries(
         Object.entries(normalized).filter(([, value]) => value !== undefined && value !== null)

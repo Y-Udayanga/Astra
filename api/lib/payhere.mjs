@@ -103,8 +103,8 @@ export function readFormBody(req) {
 
 export function getPayHereCredentials() {
     return {
-        merchantId: process.env.PAYHERE_MERCHANT_ID || process.env.VITE_PAYHERE_MERCHANT_ID || '',
-        merchantSecret: process.env.PAYHERE_MERCHANT_SECRET || process.env.VITE_PAYHERE_MERCHANT_SECRET || '',
+        merchantId: (process.env.PAYHERE_MERCHANT_ID || process.env.VITE_PAYHERE_MERCHANT_ID || '').trim(),
+        merchantSecret: (process.env.PAYHERE_MERCHANT_SECRET || process.env.VITE_PAYHERE_MERCHANT_SECRET || '').trim(),
         sandbox: (process.env.PAYHERE_SANDBOX ?? 'true') !== 'false',
     };
 }
