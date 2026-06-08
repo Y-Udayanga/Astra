@@ -6,7 +6,7 @@ import { useCurrency } from '../context/CurrencyContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, CreditCard, ShieldCheck, Lock, AlertTriangle } from 'lucide-react';
 import { createOrder, updateOrderStatus } from '../services/api';
-import { preparePayHerePayment, startPayHereCheckout } from '../services/payhere';
+import { preparePayHerePayment, startPayHereCheckout, formatPayHereError } from '../services/payhere';
 import { handleImgError } from '../utils/imageFallback';
 
 const PAY_CURRENCY = 'LKR';
@@ -24,6 +24,9 @@ const Checkout = () => {
     const [completedOrderId, setCompletedOrderId] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [configError, setConfigError] = useState('');
+    const [payHereDomain, setPayHereDomain] = useState(() =>
+        typeof window !== 'undefined' ? window.location.hostname : 'astra-web-app.vercel.app'
+    );
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -76,6 +79,9 @@ const Checkout = () => {
             });
 
             const paymentPrep = await preparePayHerePayment(payAmountLKR, draftOrderId);
+            if (paymentPrep.site_domain) {
+                setPayHereDomain(paymentPrep.site_domain);
+            }
 
             const payment = {
                 sandbox: paymentPrep.sandbox,
@@ -116,11 +122,7 @@ const Checkout = () => {
                     setConfigError('Payment window was closed before completion. Your order is still pending — click Pay again to retry.');
                 },
                 onError: (error) => {
-                    const message = typeof error === 'string' ? error : 'Payment failed.';
-                    const domainHint = /unauthorized|domain|origin/i.test(message)
-                        ? ' Register this site domain in PayHere Sandbox → Integrations (e.g. localhost or astra-web-app.vercel.app).'
-                        : '';
-                    setConfigError(`${message}${domainHint}`);
+                    setConfigError(formatPayHereError(error, payHereDomain));
                     setIsProcessing(false);
                 },
             });
@@ -206,6 +208,11 @@ const Checkout = () => {
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
                                     <Lock size={14} /> Secured by PayHere sandbox — payment hash is generated server-side.
+                                </div>
+                                <div style={{ fontSize: '0.82rem', color: 'var(--color-text-subtle)', lineHeight: 1.5, padding: '10px 12px', borderRadius: '10px', backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}>
+                                    <strong>Sandbox setup:</strong> Register <code style={{ fontSize: '0.8rem' }}>{payHereDomain}</code> at{' '}
+                                    <a href="https://sandbox.payhere.lk/merchant/domains" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>sandbox.payhere.lk → Integrations</a>
+                                    , wait for approval, then set that domain&apos;s Merchant Secret in Vercel as <code style={{ fontSize: '0.8rem' }}>PAYHERE_MERCHANT_SECRET</code>.
                                 </div>
                                 <div style={{ fontSize: '0.82rem', color: 'var(--color-text-subtle)', lineHeight: 1.5 }}>
                                     Sandbox test card: 4916 0000 0000 0000 · Exp 01/28 · CVV 100 · Name: S. Perera
