@@ -1,5 +1,22 @@
 const PAYHERE_HASH_PATH = '/api/payhere-hash';
 
+function sanitizePayHerePayment(payment) {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const normalized = {
+        ...payment,
+        merchant_id: String(payment.merchant_id ?? ''),
+        amount: String(payment.amount ?? ''),
+        currency: String(payment.currency ?? 'LKR'),
+        // PayHere requires these keys; undefined becomes the literal string "undefined".
+        return_url: payment.return_url ?? `${origin}/checkout`,
+        cancel_url: payment.cancel_url ?? `${origin}/checkout`,
+    };
+
+    return Object.fromEntries(
+        Object.entries(normalized).filter(([, value]) => value !== undefined && value !== null)
+    );
+}
+
 export async function preparePayHerePayment(amountLKR, orderId) {
     const response = await fetch(PAYHERE_HASH_PATH, {
         method: 'POST',
@@ -37,9 +54,20 @@ export function waitForPayHereSdk(timeoutMs = 8000) {
 
 export function startPayHereCheckout(payment, handlers) {
     return waitForPayHereSdk().then((payhere) => {
-        payhere.onCompleted = handlers.onCompleted;
-        payhere.onDismissed = handlers.onDismissed;
-        payhere.onError = handlers.onError;
-        payhere.startPayment(payment);
+        let completed = false;
+
+        payhere.onCompleted = (orderId) => {
+            completed = true;
+            handlers.onCompleted?.(orderId);
+        };
+        payhere.onDismissed = () => {
+            if (completed) return;
+            handlers.onDismissed?.();
+        };
+        payhere.onError = (error) => {
+            handlers.onError?.(error);
+        };
+
+        payhere.startPayment(sanitizePayHerePayment(payment));
     });
 }

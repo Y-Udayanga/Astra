@@ -80,9 +80,6 @@ const Checkout = () => {
             const payment = {
                 sandbox: paymentPrep.sandbox,
                 merchant_id: paymentPrep.merchant_id,
-                // PayHere JS SDK popup mode requires these to stay undefined.
-                return_url: undefined,
-                cancel_url: undefined,
                 notify_url: paymentPrep.notify_url,
                 order_id: paymentPrep.order_id,
                 items: 'ASTRA Store Purchase',
@@ -116,10 +113,14 @@ const Checkout = () => {
                 },
                 onDismissed: () => {
                     setIsProcessing(false);
-                    setConfigError('Payment was cancelled. Your order remains pending — you can try again.');
+                    setConfigError('Payment window was closed before completion. Your order is still pending — click Pay again to retry.');
                 },
                 onError: (error) => {
-                    setConfigError(typeof error === 'string' ? error : 'Payment failed. Please verify your PayHere sandbox domain and try again.');
+                    const message = typeof error === 'string' ? error : 'Payment failed.';
+                    const domainHint = /unauthorized|domain|origin/i.test(message)
+                        ? ' Register this site domain in PayHere Sandbox → Integrations (e.g. localhost or astra-web-app.vercel.app).'
+                        : '';
+                    setConfigError(`${message}${domainHint}`);
                     setIsProcessing(false);
                 },
             });
