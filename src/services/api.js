@@ -26,7 +26,7 @@ const mapOrder = (row) => ({
     city: row.city,
     country: row.country,
     amount: Number(row.amount ?? 0),
-    currency: row.currency ?? 'USD',
+    currency: row.currency ?? 'LKR',
     paymentMethod: row.payment_method ?? 'card',
     status: row.status ?? 'pending',
     createdAt: row.created_at,
@@ -182,7 +182,7 @@ export const createOrder = async (orderData) => {
         city: orderData.city,
         country: orderData.country ?? 'Sri Lanka',
         amount: Number(orderData.amount ?? 0),
-        currency: orderData.currency ?? 'USD',
+        currency: orderData.currency ?? 'LKR',
         payment_method: orderData.paymentMethod ?? 'card',
         status: orderData.status ?? 'pending',
     };
