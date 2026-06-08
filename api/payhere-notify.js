@@ -28,8 +28,12 @@ export default async function handler(req, res) {
     try {
         const params = await readFormBody(req);
 
-        if (!verifyNotificationSignature(params, merchantSecret)) {
+        const sigResult = verifyNotificationSignature(params, merchantSecret);
+        if (!sigResult.ok) {
             console.error('payhere-notify: invalid signature for order', params.order_id);
+            if (process.env.PAYHERE_DEBUG === 'true') {
+                console.error('payhere-notify: signature mismatch', { localSig: sigResult.localSig, provided: sigResult.provided });
+            }
             return res.status(400).send('Invalid signature');
         }
 

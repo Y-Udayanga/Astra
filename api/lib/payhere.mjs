@@ -23,7 +23,7 @@ export function generatePaymentHash(merchantId, orderId, amount, currency, merch
 
 export function verifyNotificationSignature(params, merchantSecret) {
     const { merchant_id, order_id, payhere_amount, payhere_currency, status_code, md5sig } = params;
-    if (!merchant_id || !order_id || !md5sig) return false;
+    if (!merchant_id || !order_id || !md5sig) return { ok: false, localSig: null, provided: String(md5sig || '').toUpperCase() };
 
     const hashedSecret = hashSecret(merchantSecret);
     const localSig = crypto
@@ -39,7 +39,7 @@ export function verifyNotificationSignature(params, merchantSecret) {
         .digest('hex')
         .toUpperCase();
 
-    return localSig === String(md5sig).toUpperCase();
+    return { ok: localSig === String(md5sig).toUpperCase(), localSig, provided: String(md5sig).toUpperCase() };
 }
 
 export function readJsonBody(req) {

@@ -48,6 +48,8 @@ export default async function handler(req, res) {
         });
     } catch (err) {
         console.error('payhere-hash error', err);
-        return res.status(500).json({ error: 'Failed to prepare PayHere payment.' });
+        // Return error.message in dev to aid debugging (do not expose in production)
+        const devDetail = String(err.message || err);
+        return res.status(500).json({ error: 'Failed to prepare PayHere payment.', detail: devDetail });
     }
 }

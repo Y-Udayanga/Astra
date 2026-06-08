@@ -76,15 +76,20 @@ function payhereDevApi(env) {
                         console.error('dev payhere-hash error', err);
                         res.statusCode = 500;
                         res.setHeader('Content-Type', 'application/json');
-                        return res.end(JSON.stringify({ error: 'Failed to prepare payment.' }));
+                            return res.end(JSON.stringify({ error: 'Failed to prepare payment.', detail: String(err.message || err) }));
                     }
                 }
 
                 if (req.url === '/api/payhere-notify' && req.method === 'POST') {
                     try {
                         const params = await readFormBody(req);
-                        if (merchantSecret && verifyNotificationSignature(params, merchantSecret)) {
-                            console.info('[dev] PayHere notify verified for', params.order_id, 'status', params.status_code);
+                        if (merchantSecret) {
+                            const sigResult = verifyNotificationSignature(params, merchantSecret);
+                            if (sigResult.ok) {
+                                console.info('[dev] PayHere notify verified for', params.order_id, 'status', params.status_code);
+                            } else if (process.env.PAYHERE_DEBUG === 'true') {
+                                console.warn('[dev] PayHere notify signature mismatch', { order: params.order_id, localSig: sigResult.localSig, provided: sigResult.provided });
+                            }
                         }
                     } catch (err) {
                         console.warn('[dev] PayHere notify parse failed', err);
