@@ -116,3 +116,12 @@ export function resolveNotifyOrigin(req) {
     if (host) return `${proto}://${host}`;
     return 'http://localhost:5173';
 }
+
+export function resolveSiteDomain(req) {
+    const origin = resolveNotifyOrigin(req);
+    try {
+        return new URL(origin).hostname;
+    } catch {
+        return origin.replace(/^https?:\/\//, '').split('/')[0] || 'localhost';
+    }
+}

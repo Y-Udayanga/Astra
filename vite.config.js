@@ -71,6 +71,7 @@ function payhereDevApi(env) {
                             hash,
                             sandbox,
                             notify_url: `${resolveNotifyOrigin(req)}/api/payhere-notify`,
+                            site_domain: resolveNotifyOrigin(req).replace(/^https?:\/\//, '').split('/')[0],
                         }));
                     } catch (err) {
                         console.error('dev payhere-hash error', err);

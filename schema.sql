@@ -236,6 +236,11 @@ create policy "orders_insert_anyone"
 create policy "orders_update_admin"
     on public.orders for update using (public.is_admin());
 
+create policy "orders_update_own"
+    on public.orders for update
+    using (auth.uid() = user_id)
+    with check (auth.uid() = user_id);
+
 create policy "orders_delete_admin"
     on public.orders for delete using (public.is_admin());
 

@@ -5,6 +5,7 @@ import {
     generatePaymentHash,
     getPayHereCredentials,
     resolveNotifyOrigin,
+    resolveSiteDomain,
     readJsonBody,
 } from './lib/payhere.mjs';
 
@@ -45,6 +46,7 @@ export default async function handler(req, res) {
             hash,
             sandbox,
             notify_url: notifyUrl,
+            site_domain: resolveSiteDomain(req),
         });
     } catch (err) {
         console.error('payhere-hash error', err);

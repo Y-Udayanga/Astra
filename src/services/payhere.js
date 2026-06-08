@@ -1,25 +1,49 @@
 const PAYHERE_HASH_PATH = '/api/payhere-hash';
 
+// PayHere onsite checkout requires strict types (sandbox must be boolean true).
 function sanitizePayHerePayment(payment) {
     const normalized = {
-        ...payment,
+        sandbox: payment.sandbox === true || payment.sandbox === 'true',
         merchant_id: String(payment.merchant_id ?? ''),
+        notify_url: String(payment.notify_url ?? ''),
+        order_id: String(payment.order_id ?? ''),
+        items: String(payment.items ?? 'Purchase'),
         amount: String(payment.amount ?? ''),
         currency: String(payment.currency ?? 'LKR'),
+        hash: String(payment.hash ?? ''),
+        first_name: String(payment.first_name ?? ''),
+        last_name: String(payment.last_name ?? ''),
+        email: String(payment.email ?? ''),
+        phone: String(payment.phone ?? ''),
+        address: String(payment.address ?? ''),
+        city: String(payment.city ?? ''),
+        country: String(payment.country ?? 'Sri Lanka'),
     };
-    
-    // Explicitly delete return_url and cancel_url if they are not provided 
-    // or set to undefined, as the Onsite Checkout popup requires them to be omitted.
-    if (normalized.return_url === undefined || normalized.return_url === '') {
-        delete normalized.return_url;
-    }
-    if (normalized.cancel_url === undefined || normalized.cancel_url === '') {
-        delete normalized.cancel_url;
-    }
 
     return Object.fromEntries(
-        Object.entries(normalized).filter(([, value]) => value !== undefined && value !== null)
+        Object.entries(normalized).filter(([, value]) => value !== undefined && value !== null && value !== '')
     );
+}
+
+export function formatPayHereError(error, siteDomain) {
+    const message = typeof error === 'string' ? error : 'Payment failed.';
+    const lower = message.toLowerCase();
+
+    if (/unauthorized|domain|origin|012008|something went wrong|invalid hash|hash/i.test(lower)) {
+        const domain = siteDomain || window.location.hostname;
+        return (
+            `PayHere rejected this site (${domain}). In PayHere Sandbox go to Integrations → Add Domain/App, ` +
+            `register "${domain}" (no https://), wait for approval, then copy that domain's Merchant Secret into ` +
+            `Vercel → Settings → Environment Variables as PAYHERE_MERCHANT_SECRET and redeploy. ` +
+            `Each domain has its own secret — localhost will not work on Vercel.`
+        );
+    }
+
+    if (/sdk failed to load|payhere.js/i.test(lower)) {
+        return 'PayHere SDK failed to load. Check your connection and that https://www.payhere.lk is not blocked.';
+    }
+
+    return message;
 }
 
 export async function preparePayHerePayment(amountLKR, orderId) {
@@ -73,6 +97,11 @@ export function startPayHereCheckout(payment, handlers) {
             handlers.onError?.(error);
         };
 
-        payhere.startPayment(sanitizePayHerePayment(payment));
+        const payload = sanitizePayHerePayment(payment);
+        if (!payload.sandbox || !payload.merchant_id || !payload.hash || !payload.amount) {
+            throw new Error('PayHere payment payload is incomplete. Check server configuration.');
+        }
+
+        payhere.startPayment(payload);
     });
 }
